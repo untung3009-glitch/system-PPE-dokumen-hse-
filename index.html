@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>LMI PPE & Document Management System</title>
+    <!-- Favicon Logo -->
+    <link rel="icon" href="https://z-cdn-media.chatglm.cn/files/342ceaed-a660-458e-b047-e67a5cbb28e5.png?auth_key=1885598233-b68f40e8beec4c8583a02cb62d86b7d5-0-a1c6bcf6e07beb253537467835f04c6f" type="image/png">
     <!-- Bootstrap 5 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- Bootstrap Icons -->
@@ -12,38 +14,108 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         :root {
-            --liugong-yellow: #FFD100;
-            --liugong-black: #1a1a1a;
-            --liugong-gray: #f4f4f4;
+            --lmg-yellow: #FFD100;
+            --lmg-blue: #005baa; /* LiuGong Blue */
+            --lmg-dark-blue: #003366;
+            --lmg-light-blue: #e3f2fd;
         }
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f8f9fa; }
-        .bg-lmg { background-color: var(--liugong-black); }
-        .text-lmg { color: var(--liugong-yellow); }
-        .btn-lmg { background-color: var(--liugong-yellow); color: var(--liugong-black); font-weight: bold; }
-        .btn-lmg:hover { background-color: #e6bd00; color: var(--liugong-black); }
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            background: linear-gradient(135deg, #ffffff 0%, #e3f2fd 100%); 
+            min-height: 100vh;
+        }
+        .text-lmg { color: var(--lmg-blue); }
+        .btn-lmg { background-color: var(--lmg-blue); color: #ffffff; font-weight: bold; transition: 0.3s; }
+        .btn-lmg:hover { background-color: var(--lmg-dark-blue); color: var(--lmg-yellow); }
         
         /* Login CSS */
-        .login-wrapper { height: 100vh; display: flex; align-items: center; justify-content: center; background: linear-gradient(135deg, #1a1a1a 0%, #2c2c2c 100%); }
-        .login-card { width: 400px; border: none; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
-        .login-logo { background: var(--liugong-yellow); color: var(--liugong-black); padding: 20px; border-radius: 15px 15px 0 0; text-align: center; font-weight: 800; font-size: 1.2rem; }
+        .login-wrapper { 
+            height: 100vh; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            background: linear-gradient(135deg, #ffffff 0%, #cce7ff 100%); 
+        }
+        .login-card { 
+            width: 420px; 
+            border: none; 
+            border-radius: 15px; 
+            box-shadow: 0 10px 30px rgba(0, 91, 170, 0.15); 
+            overflow: hidden;
+        }
+        .login-logo { 
+            background: #ffffff; 
+            padding: 25px; 
+            text-align: center; 
+            border-bottom: 1px solid #eee; 
+        }
+        .login-logo img { max-height: 60px; width: auto; }
         
         /* Sidebar CSS */
         .wrapper { display: flex; min-height: 100vh; }
-        .sidebar { width: 250px; background-color: var(--liugong-black); color: white; transition: all 0.3s; }
-        .sidebar.hidden { margin-left: -250px; }
-        .sidebar-header { padding: 20px; background-color: #111; text-align: center; border-bottom: 4px solid var(--liugong-yellow); }
+        .sidebar { 
+            width: 260px; 
+            background-color: #ffffff; 
+            color: var(--lmg-dark-blue); 
+            transition: all 0.3s; 
+            border-right: 1px solid #e0e0e0;
+            box-shadow: 2px 0 10px rgba(0,0,0,0.05);
+        }
+        .sidebar.hidden { margin-left: -260px; }
+        .sidebar-header { 
+            padding: 15px; 
+            background: #ffffff; 
+            text-align: center; 
+            border-bottom: 4px solid var(--lmg-yellow); 
+        }
+        .sidebar-header img { max-height: 40px; width: auto; }
         .sidebar-menu { padding: 15px 0; }
-        .sidebar-menu a { display: flex; align-items: center; padding: 12px 20px; color: #ccc; text-decoration: none; transition: 0.3s; }
-        .sidebar-menu a:hover, .sidebar-menu a.active { background-color: #333; color: var(--liugong-yellow); border-left: 4px solid var(--liugong-yellow); }
+        .sidebar-menu h6 { color: #888; font-weight: bold; }
+        .sidebar-menu a { 
+            display: flex; 
+            align-items: center; 
+            padding: 12px 20px; 
+            color: #555; 
+            text-decoration: none; 
+            transition: 0.3s; 
+            border-left: 4px solid transparent;
+        }
+        .sidebar-menu a:hover, .sidebar-menu a.active { 
+            background-color: var(--lmg-light-blue); 
+            color: var(--lmg-blue); 
+            border-left: 4px solid var(--lmg-blue); 
+            font-weight: bold;
+        }
         .sidebar-menu a i { margin-right: 10px; font-size: 1.2rem; }
         
         .content { flex: 1; overflow-x: hidden; }
-        .navbar-top { background-color: white; padding: 15px 25px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        .navbar-top { 
+            background-color: white; 
+            padding: 15px 25px; 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05); 
+        }
         
-        .card-stat { border-left: 5px solid var(--liugong-yellow); border-radius: 10px; }
-        .drop-zone { border: 2px dashed #ccc; padding: 40px; text-align: center; border-radius: 10px; background: #fafafa; cursor: pointer; }
-        .drop-zone.dragover { border-color: var(--liugong-yellow); background: #fff9e6; }
-        .signature-pad { border: 1px solid #ccc; border-radius: 5px; touch-action: none; }
+        .card { border: none; border-radius: 10px; box-shadow: 0 4px 20px rgba(0,0,0,0.03); }
+        .card-stat { border-left: 5px solid var(--lmg-blue); }
+        .card-header { background-color: white; border-bottom: 1px solid #eee; font-weight: bold; color: var(--lmg-dark-blue); }
+        
+        .drop-zone { 
+            border: 2px dashed var(--lmg-blue); 
+            padding: 40px; 
+            text-align: center; 
+            border-radius: 10px; 
+            background: #f8fbff; 
+            cursor: pointer; 
+            transition: 0.3s;
+        }
+        .drop-zone:hover, .drop-zone.dragover { 
+            border-color: var(--lmg-yellow); 
+            background: #fffdf0; 
+        }
+        .table thead th { background-color: var(--lmg-dark-blue); color: white; }
     </style>
 </head>
 <body>
@@ -52,28 +124,28 @@
 <div id="loginView" class="login-wrapper">
     <div class="login-card">
         <div class="login-logo">
-            PT LiuGong Machinery Indonesia<br>
-            <small>FMC Site Bakan</small>
+            <img src="https://z-cdn-media.chatglm.cn/files/342ceaed-a660-458e-b047-e67a5cbb28e5.png?auth_key=1885598233-b68f40e8beec4c8583a02cb62d86b7d5-0-a1c6bcf6e07beb253537467835f04c6f" alt="LiuGong Logo">
+            <h6 class="mt-2 text-secondary mb-0">PPE & Document Management System</h6>
+            <small class="text-muted">FMC Site Bakan</small>
         </div>
         <div class="card-body p-4">
-            <h5 class="text-center mb-4">PPE & Document System</h5>
             <form id="loginForm">
                 <div class="mb-3">
                     <label class="form-label">Email / Username</label>
                     <div class="input-group">
-                        <span class="input-group-text"><i class="bi bi-person"></i></span>
+                        <span class="input-group-text bg-light"><i class="bi bi-person"></i></span>
                         <input type="text" class="form-control" id="username" required value="admin@liugong.co.id">
                     </div>
                 </div>
                 <div class="mb-3">
                     <label class="form-label">Password</label>
                     <div class="input-group">
-                        <span class="input-group-text"><i class="bi bi-lock"></i></span>
+                        <span class="input-group-text bg-light"><i class="bi bi-lock"></i></span>
                         <input type="password" class="form-control" id="password" required value="admin123">
                         <button class="btn btn-outline-secondary" type="button" id="togglePass"><i class="bi bi-eye"></i></button>
                     </div>
                 </div>
-                <div class="mb-3 form-check">
+                <div class="mb-4 form-check">
                     <input type="checkbox" class="form-check-input" id="rememberMe">
                     <label class="form-check-label" for="rememberMe">Remember Me</label>
                 </div>
@@ -88,21 +160,20 @@
     <!-- Sidebar -->
     <nav class="sidebar" id="sidebar">
         <div class="sidebar-header">
-            <h5 class="m-0 text-lmg">LMI SYSTEM</h5>
-            <small>PPE & Documents</small>
+            <img src="https://z-cdn-media.chatglm.cn/files/342ceaed-a660-458e-b047-e67a5cbb28e5.png?auth_key=1885598233-b68f40e8beec4c8583a02cb62d86b7d5-0-a1c6bcf6e07beb253537467835f04c6f" alt="LiuGong Logo">
         </div>
         <div class="sidebar-menu">
-            <a href="#" class="active" onclick="showPage('dashboard')"><i class="bi bi-speedometer2"></i> Dashboard</a>
+            <a href="#" class="active" onclick="showPage('dashboard', event)"><i class="bi bi-speedometer2"></i> Dashboard</a>
             
-            <h6 class="text-secondary ms-3 mt-3 text-uppercase" style="font-size: 0.7rem;">PPE Management</h6>
-            <a href="#" onclick="showPage('ppe_form')"><i class="bi bi-file-earmark-plus"></i> Pengajuan APD</a>
-            <a href="#" onclick="showPage('ppe_history')"><i class="bi bi-clock-history"></i> Riwayat Pengajuan</a>
-            <a href="#" onclick="showPage('ppe_approval')"><i class="bi bi-check2-square"></i> Approval</a>
-            <a href="#" onclick="showPage('ppe_stock')"><i class="bi bi-box-seam"></i> Stock APD</a>
+            <h6 class="text-muted ms-3 mt-3 text-uppercase" style="font-size: 0.7rem;">PPE Management</h6>
+            <a href="#" onclick="showPage('ppe_form', event)"><i class="bi bi-file-earmark-plus"></i> Pengajuan APD</a>
+            <a href="#" onclick="showPage('ppe_history', event)"><i class="bi bi-clock-history"></i> Riwayat Pengajuan</a>
+            <a href="#" onclick="showPage('ppe_approval', event)"><i class="bi bi-check2-square"></i> Approval</a>
+            <a href="#" onclick="showPage('ppe_stock', event)"><i class="bi bi-box-seam"></i> Stock APD</a>
             
-            <h6 class="text-secondary ms-3 mt-3 text-uppercase" style="font-size: 0.7rem;">Document Storage</h6>
-            <a href="#" onclick="showPage('doc_folder')"><i class="bi bi-folder2"></i> Folder</a>
-            <a href="#" onclick="showPage('doc_upload')"><i class="bi bi-cloud-upload"></i> Upload Dokumen</a>
+            <h6 class="text-muted ms-3 mt-3 text-uppercase" style="font-size: 0.7rem;">Document Storage</h6>
+            <a href="#" onclick="showPage('doc_folder', event)"><i class="bi bi-folder2"></i> Folder</a>
+            <a href="#" onclick="showPage('doc_upload', event)"><i class="bi bi-cloud-upload"></i> Upload Dokumen</a>
         </div>
     </nav>
 
@@ -110,18 +181,19 @@
     <div class="content">
         <!-- Navbar Top -->
         <div class="navbar-top">
-            <button class="btn btn-light" onclick="toggleSidebar()"><i class="bi bi-list"></i></button>
+            <button class="btn btn-light border" onclick="toggleSidebar()"><i class="bi bi-list"></i></button>
             <div class="d-flex align-items-center">
-                <button class="btn btn-light position-relative me-3">
+                <button class="btn btn-light border position-relative me-3">
                     <i class="bi bi-bell"></i>
                     <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">3</span>
                 </button>
                 <div class="dropdown">
-                    <button class="btn btn-light dropdown-toggle" data-bs-toggle="dropdown">
-                        <i class="bi bi-person-circle"></i> <span id="userName">Admin</span>
+                    <button class="btn btn-light border dropdown-toggle" data-bs-toggle="dropdown">
+                        <i class="bi bi-person-circle text-lmg"></i> <span id="userName" class="fw-bold">Admin</span>
                     </button>
                     <ul class="dropdown-menu dropdown-menu-end">
                         <li><a class="dropdown-item" href="#"><i class="bi bi-gear"></i> Settings</a></li>
+                        <li><hr class="dropdown-divider"></li>
                         <li><a class="dropdown-item text-danger" href="#" onclick="logout()"><i class="bi bi-box-arrow-right"></i> Logout</a></li>
                     </ul>
                 </div>
@@ -133,49 +205,49 @@
             
             <!-- DASHBOARD PAGE -->
             <div id="page-dashboard" class="page-content">
-                <h2 class="mb-4">Dashboard</h2>
+                <h2 class="mb-4 text-lmg fw-bold">Dashboard</h2>
                 <div class="row g-4">
                     <div class="col-md-3">
-                        <div class="card card-stat shadow-sm">
+                        <div class="card card-stat shadow-sm h-100">
                             <div class="card-body d-flex justify-content-between align-items-center">
                                 <div>
-                                    <h6 class="text-muted">Total Pengajuan APD</h6>
-                                    <h3 class="mb-0">120</h3>
+                                    <h6 class="text-muted mb-1">Total Pengajuan APD</h6>
+                                    <h3 class="mb-0 fw-bold">120</h3>
                                 </div>
-                                <i class="bi bi-file-text fs-1 text-warning"></i>
+                                <i class="bi bi-file-text fs-1" style="color: var(--lmg-blue)"></i>
                             </div>
                         </div>
                     </div>
                     <div class="col-md-3">
-                        <div class="card card-stat shadow-sm">
+                        <div class="card card-stat shadow-sm h-100">
                             <div class="card-body d-flex justify-content-between align-items-center">
                                 <div>
-                                    <h6 class="text-muted">Pending Approval</h6>
-                                    <h3 class="mb-0">15</h3>
+                                    <h6 class="text-muted mb-1">Pending Approval</h6>
+                                    <h3 class="mb-0 fw-bold">15</h3>
                                 </div>
-                                <i class="bi bi-hourglass-split fs-1 text-warning"></i>
+                                <i class="bi bi-hourglass-split fs-1" style="color: var(--lmg-yellow)"></i>
                             </div>
                         </div>
                     </div>
                     <div class="col-md-3">
-                        <div class="card card-stat shadow-sm">
+                        <div class="card card-stat shadow-sm h-100">
                             <div class="card-body d-flex justify-content-between align-items-center">
                                 <div>
-                                    <h6 class="text-muted">Total Dokumen</h6>
-                                    <h3 class="mb-0">450</h3>
+                                    <h6 class="text-muted mb-1">Total Dokumen</h6>
+                                    <h3 class="mb-0 fw-bold">450</h3>
                                 </div>
-                                <i class="bi bi-folder fs-1 text-warning"></i>
+                                <i class="bi bi-folder fs-1" style="color: var(--lmg-blue)"></i>
                             </div>
                         </div>
                     </div>
                     <div class="col-md-3">
-                        <div class="card card-stat shadow-sm">
+                        <div class="card card-stat shadow-sm h-100">
                             <div class="card-body d-flex justify-content-between align-items-center">
                                 <div>
-                                    <h6 class="text-muted">Stock APD Available</h6>
-                                    <h3 class="mb-0">320</h3>
+                                    <h6 class="text-muted mb-1">Stock APD Available</h6>
+                                    <h3 class="mb-0 fw-bold">320</h3>
                                 </div>
-                                <i class="bi bi-boxes fs-1 text-warning"></i>
+                                <i class="bi bi-boxes fs-1" style="color: var(--lmg-yellow)"></i>
                             </div>
                         </div>
                     </div>
@@ -184,18 +256,19 @@
                 <div class="row mt-4">
                     <div class="col-md-8">
                         <div class="card shadow-sm">
-                            <div class="card-header bg-white"><h5 class="mb-0">Grafik Pengajuan APD Bulanan</h5></div>
+                            <div class="card-header"><h5 class="mb-0">Grafik Pengajuan APD Bulanan</h5></div>
                             <div class="card-body"><canvas id="ppeChart" height="100"></canvas></div>
                         </div>
                     </div>
                     <div class="col-md-4">
                         <div class="card shadow-sm">
-                            <div class="card-header bg-white"><h5 class="mb-0">Aktivitas Terbaru</h5></div>
+                            <div class="card-header"><h5 class="mb-0">Aktivitas Terbaru</h5></div>
                             <div class="card-body">
                                 <ul class="list-group list-group-flush">
-                                    <li class="list-group-item"><i class="bi bi-upload text-success"></i> Upload SOP Welding.pdf</li>
-                                    <li class="list-group-item"><i class="bi bi-check2 text-primary"></i> APD Approved by PM</li>
-                                    <li class="list-group-item"><i class="bi bi-box text-warning"></i> Stock Helmet updated</li>
+                                    <li class="list-group-item border-0"><i class="bi bi-upload text-success me-2"></i> Upload SOP Welding.pdf</li>
+                                    <li class="list-group-item border-0"><i class="bi bi-check2 text-primary me-2"></i> APD Approved by PM</li>
+                                    <li class="list-group-item border-0"><i class="bi bi-box text-warning me-2"></i> Stock Helmet updated</li>
+                                    <li class="list-group-item border-0"><i class="bi bi-file-earmark-plus text-danger me-2"></i> New request from Asep</li>
                                 </ul>
                             </div>
                         </div>
@@ -205,36 +278,38 @@
 
             <!-- PPE FORM PAGE -->
             <div id="page-ppe_form" class="page-content" style="display:none;">
-                <h2 class="mb-4">Form Pengajuan APD</h2>
+                <h2 class="mb-4 text-lmg fw-bold">Form Pengajuan APD</h2>
                 <div class="card shadow-sm">
-                    <div class="card-body">
+                    <div class="card-body p-4">
                         <form>
                             <div class="row mb-3">
                                 <div class="col-md-6">
-                                    <label class="form-label">Nomor Pengajuan (Auto)</label>
+                                    <label class="form-label text-muted">Nomor Pengajuan (Auto)</label>
                                     <input type="text" class="form-control" value="PPE-20231025-001" readonly>
                                 </div>
                                 <div class="col-md-6">
-                                    <label class="form-label">Tanggal</label>
+                                    <label class="form-label text-muted">Tanggal</label>
                                     <input type="date" class="form-control" value="2023-10-25">
                                 </div>
                             </div>
                             <div class="row mb-3">
-                                <div class="col-md-6"><label class="form-label">Nama Pemohon</label><input type="text" class="form-control" placeholder="Nama Lengkap"></div>
-                                <div class="col-md-6"><label class="form-label">NIK</label><input type="text" class="form-control" placeholder="Nomor Induk Karyawan"></div>
+                                <div class="col-md-6"><label class="form-label text-muted">Nama Pemohon</label><input type="text" class="form-control" placeholder="Nama Lengkap"></div>
+                                <div class="col-md-6"><label class="form-label text-muted">NIK</label><input type="text" class="form-control" placeholder="Nomor Induk Karyawan"></div>
                             </div>
-                            <hr>
-                            <h6>Informasi Permintaan</h6>
+                            <hr class="my-4">
+                            <h5 class="text-lmg mb-3">Informasi Permintaan</h5>
                             <div class="row mb-3">
-                                <div class="col-md-4"><label class="form-label">Jenis APD</label><select class="form-select"><option>Helm Safety</option><option>Sepatu Safety</option><option>Sarung Tangan</option></select></div>
-                                <div class="col-md-4"><label class="form-label">Ukuran</label><input type="text" class="form-control" placeholder="L, XL, 42, dll"></div>
-                                <div class="col-md-4"><label class="form-label">Jumlah</label><input type="number" class="form-control" placeholder="0"></div>
+                                <div class="col-md-4"><label class="form-label text-muted">Jenis APD</label><select class="form-select"><option>Helm Safety</option><option>Sepatu Safety</option><option>Sarung Tangan</option></select></div>
+                                <div class="col-md-4"><label class="form-label text-muted">Ukuran</label><input type="text" class="form-control" placeholder="L, XL, 42, dll"></div>
+                                <div class="col-md-4"><label class="form-label text-muted">Jumlah</label><input type="number" class="form-control" placeholder="0"></div>
                             </div>
                             <div class="mb-3">
-                                <label class="form-label">Upload Foto Pendukung (Opsional)</label>
+                                <label class="form-label text-muted">Upload Foto Pendukung (Opsional)</label>
                                 <input type="file" class="form-control">
                             </div>
-                            <button type="submit" class="btn btn-lmg">Submit Pengajuan</button>
+                            <div class="text-end mt-4">
+                                <button type="submit" class="btn btn-lmg px-4">Submit Pengajuan</button>
+                            </div>
                         </form>
                     </div>
                 </div>
@@ -242,23 +317,23 @@
 
             <!-- PPE HISTORY PAGE -->
             <div id="page-ppe_history" class="page-content" style="display:none;">
-                <h2 class="mb-4">Riwayat Pengajuan APD</h2>
+                <h2 class="mb-4 text-lmg fw-bold">Riwayat Pengajuan APD</h2>
                 <div class="card shadow-sm">
                     <div class="card-body">
-                        <table class="table table-hover">
-                            <thead class="table-dark">
-                                <tr><th>No. Pengajuan</th><th>Tanggal</th><th>Nama</th><th>APD</th><th>Status</th><th>Aksi</th></tr>
+                        <table class="table table-hover align-middle">
+                            <thead>
+                                <tr><th>No. Pengajuan</th><th>Tanggal</th><th>Nama</th><th>APD</th><th>Status</th><th class="text-end">Aksi</th></tr>
                             </thead>
                             <tbody>
                                 <tr>
-                                    <td>PPE-20231025-001</td><td>25-10-2023</td><td>Budi</td><td>Helm Safety</td>
-                                    <td><span class="badge bg-warning">Pending</span></td>
-                                    <td><button class="btn btn-sm btn-info text-white"><i class="bi bi-eye"></i></button></td>
+                                    <td class="fw-bold">PPE-20231025-001</td><td>25-10-2023</td><td>Budi Santoso</td><td>Helm Safety</td>
+                                    <td><span class="badge bg-warning text-dark">Pending</span></td>
+                                    <td class="text-end"><button class="btn btn-sm btn-outline-primary"><i class="bi bi-eye"></i> Detail</button></td>
                                 </tr>
                                 <tr>
-                                    <td>PPE-20231024-002</td><td>24-10-2023</td><td>Asep</td><td>Sepatu Safety</td>
+                                    <td class="fw-bold">PPE-20231024-002</td><td>24-10-2023</td><td>Asep Kurniawan</td><td>Sepatu Safety</td>
                                     <td><span class="badge bg-success">Completed</span></td>
-                                    <td><button class="btn btn-sm btn-info text-white"><i class="bi bi-eye"></i></button></td>
+                                    <td class="text-end"><button class="btn btn-sm btn-outline-primary"><i class="bi bi-eye"></i> Detail</button></td>
                                 </tr>
                             </tbody>
                         </table>
@@ -268,14 +343,17 @@
 
             <!-- PPE APPROVAL PAGE -->
             <div id="page-ppe_approval" class="page-content" style="display:none;">
-                <h2 class="mb-4">Approval APD</h2>
+                <h2 class="mb-4 text-lmg fw-bold">Approval APD</h2>
                 <div class="card shadow-sm">
                     <div class="card-body">
-                        <div class="alert alert-info">Menunggu Approval Safety Coordinator</div>
-                        <table class="table">
-                            <thead><tr><th>Nama</th><th>APD</th><th>Jumlah</th><th>Aksi</th></tr></thead>
+                        <div class="alert alert-info d-flex align-items-center" role="alert">
+                            <i class="bi bi-info-circle-fill me-2"></i>
+                            <div>Menunggu Approval dari Safety Coordinator</div>
+                        </div>
+                        <table class="table align-middle">
+                            <thead><tr><th>Nama</th><th>APD</th><th>Jumlah</th><th class="text-end">Aksi</th></tr></thead>
                             <tbody>
-                                <tr><td>Budi</td><td>Helm Safety</td><td>2</td><td><button class="btn btn-success btn-sm">Approve</button> <button class="btn btn-danger btn-sm">Reject</button></td></tr>
+                                <tr><td>Budi Santoso</td><td>Helm Safety</td><td>2 Pcs</td><td class="text-end"><button class="btn btn-success btn-sm me-2"><i class="bi bi-check-lg"></i> Approve</button> <button class="btn btn-danger btn-sm"><i class="bi bi-x-lg"></i> Reject</button></td></tr>
                             </tbody>
                         </table>
                     </div>
@@ -284,15 +362,17 @@
 
             <!-- PPE STOCK PAGE -->
             <div id="page-ppe_stock" class="page-content" style="display:none;">
-                <h2 class="mb-4">Master & Stock APD</h2>
+                <h2 class="mb-4 text-lmg fw-bold">Master & Stock APD</h2>
                 <div class="card shadow-sm">
                     <div class="card-body">
-                        <button class="btn btn-lmg mb-3"><i class="bi bi-plus-lg"></i> Tambah APD</button>
-                        <table class="table table-bordered">
+                        <div class="text-end mb-3">
+                            <button class="btn btn-lmg"><i class="bi bi-plus-lg"></i> Tambah APD</button>
+                        </div>
+                        <table class="table table-bordered align-middle">
                             <thead class="table-light"><tr><th>Nama APD</th><th>Kategori</th><th>Stock</th><th>Min Stock</th><th>Status</th></tr></thead>
                             <tbody>
-                                <tr><td>Helm MSA V-Gard</td><td>Head Protection</td><td>50</td><td>10</td><td><span class="badge bg-success">Aman</span></td></tr>
-                                <tr><td>Sepatu Cheetah</td><td>Foot Protection</td><td>5</td><td>10</td><td><span class="badge bg-danger">Order Ulang</span></td></tr>
+                                <tr><td class="fw-bold">Helm MSA V-Gard</td><td>Head Protection</td><td>50</td><td>10</td><td><span class="badge bg-success">Aman</span></td></tr>
+                                <tr><td class="fw-bold">Sepatu Cheetah</td><td>Foot Protection</td><td>5</td><td>10</td><td><span class="badge bg-danger">Order Ulang</span></td></tr>
                             </tbody>
                         </table>
                     </div>
@@ -301,30 +381,38 @@
 
             <!-- DOC FOLDER PAGE -->
             <div id="page-doc_folder" class="page-content" style="display:none;">
-                <h2 class="mb-4">Document Folder Management</h2>
+                <h2 class="mb-4 text-lmg fw-bold">Document Folder Management</h2>
                 <div class="row">
-                    <div class="col-md-3 mb-3">
-                        <div class="card shadow-sm text-center p-3">
-                            <i class="bi bi-folder-fill text-warning" style="font-size: 3rem;"></i>
-                            <h6 class="mt-2">SOP</h6>
+                    <div class="col-md-3 mb-4">
+                        <div class="card shadow-sm text-center p-4 h-100 hover-shadow">
+                            <i class="bi bi-folder-fill" style="font-size: 4rem; color: var(--lmg-yellow);"></i>
+                            <h6 class="mt-3 mb-0 fw-bold">SOP</h6>
                             <small class="text-muted">15 Files</small>
-                            <div class="mt-2"><button class="btn btn-sm btn-outline-primary"><i class="bi bi-folder2-open"></i> Buka</button></div>
+                            <div class="mt-3"><button class="btn btn-sm btn-outline-primary w-100"><i class="bi bi-folder2-open"></i> Buka</button></div>
                         </div>
                     </div>
-                    <div class="col-md-3 mb-3">
-                        <div class="card shadow-sm text-center p-3">
-                            <i class="bi bi-folder-fill text-warning" style="font-size: 3rem;"></i>
-                            <h6 class="mt-2">Work Instruction</h6>
+                    <div class="col-md-3 mb-4">
+                        <div class="card shadow-sm text-center p-4 h-100 hover-shadow">
+                            <i class="bi bi-folder-fill" style="font-size: 4rem; color: var(--lmg-yellow);"></i>
+                            <h6 class="mt-3 mb-0 fw-bold">Work Instruction</h6>
                             <small class="text-muted">8 Files</small>
-                            <div class="mt-2"><button class="btn btn-sm btn-outline-primary"><i class="bi bi-folder2-open"></i> Buka</button></div>
+                            <div class="mt-3"><button class="btn btn-sm btn-outline-primary w-100"><i class="bi bi-folder2-open"></i> Buka</button></div>
                         </div>
                     </div>
-                    <div class="col-md-3 mb-3">
-                        <div class="card shadow-sm text-center p-3">
-                            <i class="bi bi-folder-fill text-warning" style="font-size: 3rem;"></i>
-                            <h6 class="mt-2">JSEA</h6>
+                    <div class="col-md-3 mb-4">
+                        <div class="card shadow-sm text-center p-4 h-100 hover-shadow">
+                            <i class="bi bi-folder-fill" style="font-size: 4rem; color: var(--lmg-yellow);"></i>
+                            <h6 class="mt-3 mb-0 fw-bold">JSEA</h6>
                             <small class="text-muted">22 Files</small>
-                            <div class="mt-2"><button class="btn btn-sm btn-outline-primary"><i class="bi bi-folder2-open"></i> Buka</button></div>
+                            <div class="mt-3"><button class="btn btn-sm btn-outline-primary w-100"><i class="bi bi-folder2-open"></i> Buka</button></div>
+                        </div>
+                    </div>
+                    <div class="col-md-3 mb-4">
+                        <div class="card shadow-sm text-center p-4 h-100 hover-shadow">
+                            <i class="bi bi-folder-fill" style="font-size: 4rem; color: var(--lmg-yellow);"></i>
+                            <h6 class="mt-3 mb-0 fw-bold">HIRA</h6>
+                            <small class="text-muted">5 Files</small>
+                            <div class="mt-3"><button class="btn btn-sm btn-outline-primary w-100"><i class="bi bi-folder2-open"></i> Buka</button></div>
                         </div>
                     </div>
                 </div>
@@ -332,22 +420,24 @@
 
             <!-- DOC UPLOAD PAGE -->
             <div id="page-doc_upload" class="page-content" style="display:none;">
-                <h2 class="mb-4">Upload Dokumen</h2>
+                <h2 class="mb-4 text-lmg fw-bold">Upload Dokumen</h2>
                 <div class="card shadow-sm">
-                    <div class="card-body">
+                    <div class="card-body p-4">
                         <div class="drop-zone" id="dropZone">
-                            <i class="bi bi-cloud-arrow-up text-warning" style="font-size: 3rem;"></i>
-                            <h5 class="mt-2">Drag & Drop file di sini atau klik untuk browse</h5>
-                            <p class="text-muted">Format: PDF, DOCX, XLSX, JPG, PNG, ZIP | Max: 20MB</p>
+                            <i class="bi bi-cloud-arrow-up" style="font-size: 4rem; color: var(--lmg-blue);"></i>
+                            <h5 class="mt-2 text-lmg">Drag & Drop file di sini atau klik untuk browse</h5>
+                            <p class="text-muted mb-0">Format: PDF, DOCX, XLSX, JPG, PNG, ZIP | Maksimal 20MB</p>
                             <input type="file" id="fileInput" style="display:none;" multiple>
                         </div>
                         <div class="mt-4">
-                            <h6>Files to upload:</h6>
+                            <h6 class="text-muted">File siap diunggah:</h6>
                             <ul class="list-group" id="fileList">
-                                <!-- File list will appear here -->
+                                <li class="list-group-item text-muted text-center border-0">Belum ada file dipilih</li>
                             </ul>
                         </div>
-                        <button class="btn btn-lmg mt-3">Start Upload</button>
+                        <div class="text-end mt-4">
+                            <button class="btn btn-lmg px-4">Start Upload</button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -362,13 +452,12 @@
     // LOGIN LOGIC
     document.getElementById('loginForm').addEventListener('submit', function(e) {
         e.preventDefault();
-        // Mock Authentication
         const user = document.getElementById('username').value;
         const pass = document.getElementById('password').value;
         if(user && pass) {
             document.getElementById('loginView').style.display = 'none';
             document.getElementById('appView').style.display = 'flex';
-            document.getElementById('userName').innerText = user.split('@')[0];
+            document.getElementById('userName').innerText = user.split('@')[0].charAt(0).toUpperCase() + user.split('@')[0].slice(1);
             initChart();
         } else {
             alert('Invalid credentials');
@@ -392,30 +481,40 @@
         document.getElementById('sidebar').classList.toggle('hidden');
     }
 
-    function showPage(pageId) {
+    function showPage(pageId, event) {
         document.querySelectorAll('.page-content').forEach(el => el.style.display = 'none');
         document.getElementById('page-' + pageId).style.display = 'block';
         
         document.querySelectorAll('.sidebar-menu a').forEach(el => el.classList.remove('active'));
-        event.target.closest('a').classList.add('active');
+        if(event) event.target.closest('a').classList.add('active');
     }
 
     // CHART INIT
     function initChart() {
         const ctx = document.getElementById('ppeChart').getContext('2d');
-        new Chart(ctx, {
+        if(window.ppeChartInstance) window.ppeChartInstance.destroy(); // Clear existing chart
+        
+        window.ppeChartInstance = new Chart(ctx, {
             type: 'bar',
             data: {
                 labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct'],
                 datasets: [{
                     label: 'Pengajuan APD',
                     data: [12, 19, 15, 25, 22, 30, 28, 35, 40, 38],
-                    backgroundColor: '#FFD100',
-                    borderColor: '#1a1a1a',
-                    borderWidth: 1
+                    backgroundColor: 'rgba(0, 91, 170, 0.7)',
+                    borderColor: 'rgba(0, 91, 170, 1)',
+                    borderWidth: 1,
+                    borderRadius: 5
                 }]
             },
-            options: { scales: { y: { beginAtZero: true } } }
+            options: { 
+                scales: { 
+                    y: { beginAtZero: true } 
+                },
+                plugins: {
+                    legend: { display: false }
+                }
+            }
         });
     }
 
@@ -436,14 +535,18 @@
 
     function handleFiles(files) {
         fileList.innerHTML = '';
+        if(files.length === 0) {
+            fileList.innerHTML = '<li class="list-group-item text-muted text-center border-0">Belum ada file dipilih</li>';
+            return;
+        }
         Array.from(files).forEach(file => {
             if(file.size > 20 * 1024 * 1024) {
-                alert(`${file.name} melebihi 20MB`);
+                alert(`${file.name} melebihi 20MB dan tidak dapat diunggah.`);
                 return;
             }
             const li = document.createElement('li');
             li.className = 'list-group-item d-flex justify-content-between align-items-center';
-            li.innerHTML = `<span><i class="bi bi-file-earmark"></i> ${file.name}</span> <span class="badge bg-primary rounded-pill">${(file.size/1024/1024).toFixed(2)} MB</span>`;
+            li.innerHTML = `<span><i class="bi bi-file-earmark text-primary me-2"></i> ${file.name}</span> <span class="badge bg-primary rounded-pill">${(file.size/1024/1024).toFixed(2)} MB</span>`;
             fileList.appendChild(li);
         });
     }
