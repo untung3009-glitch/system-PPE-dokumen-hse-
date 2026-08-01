@@ -12,6 +12,8 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
+    <!-- Library JSZip untuk Download Foto -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
     <style>
         :root {
             --lmg-yellow: #FFD100;
@@ -146,12 +148,15 @@
             
             <!-- DASHBOARD -->
             <div id="page-dashboard" class="page-content">
-                <h2 class="mb-4 text-lmg fw-bold">Dashboard</h2>
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h2 class="mb-0 text-lmg fw-bold">Dashboard</h2>
+                    <button class="btn btn-warning btn-sm admin-only" style="display: none;" onclick="openEditDashboardModal()"><i class="bi bi-pencil-square"></i> Edit Dashboard</button>
+                </div>
                 <div class="row g-4">
                     <div class="col-md-3"><div class="card card-stat shadow-sm h-100"><div class="card-body d-flex justify-content-between align-items-center"><div><h6 class="text-muted mb-1">Total Pengajuan APD</h6><h3 class="mb-0 fw-bold" id="dashTotal">0</h3></div><i class="bi bi-file-text fs-1" style="color: var(--lmg-blue)"></i></div></div></div>
                     <div class="col-md-3"><div class="card card-stat shadow-sm h-100"><div class="card-body d-flex justify-content-between align-items-center"><div><h6 class="text-muted mb-1">Pending Approval</h6><h3 class="mb-0 fw-bold" id="dashPending">0</h3></div><i class="bi bi-hourglass-split fs-1" style="color: var(--lmg-yellow)"></i></div></div></div>
-                    <div class="col-md-3"><div class="card card-stat shadow-sm h-100"><div class="card-body d-flex justify-content-between align-items-center"><div><h6 class="text-muted mb-1">Total Dokumen</h6><h3 class="mb-0 fw-bold">450</h3></div><i class="bi bi-folder fs-1" style="color: var(--lmg-blue)"></i></div></div></div>
-                    <div class="col-md-3"><div class="card card-stat shadow-sm h-100"><div class="card-body d-flex justify-content-between align-items-center"><div><h6 class="text-muted mb-1">Stock APD Available</h6><h3 class="mb-0 fw-bold">320</h3></div><i class="bi bi-boxes fs-1" style="color: var(--lmg-yellow)"></i></div></div></div>
+                    <div class="col-md-3"><div class="card card-stat shadow-sm h-100"><div class="card-body d-flex justify-content-between align-items-center"><div><h6 class="text-muted mb-1">Total Dokumen</h6><h3 class="mb-0 fw-bold" id="dashDocs">450</h3></div><i class="bi bi-folder fs-1" style="color: var(--lmg-blue)"></i></div></div></div>
+                    <div class="col-md-3"><div class="card card-stat shadow-sm h-100"><div class="card-body d-flex justify-content-between align-items-center"><div><h6 class="text-muted mb-1">Stock APD Available</h6><h3 class="mb-0 fw-bold" id="dashStock">320</h3></div><i class="bi bi-boxes fs-1" style="color: var(--lmg-yellow)"></i></div></div></div>
                 </div>
                 <div class="row mt-4">
                     <div class="col-md-8"><div class="card shadow-sm"><div class="card-header"><h5 class="mb-0">Grafik Pengajuan APD Bulanan</h5></div><div class="card-body"><canvas id="ppeChart" height="100"></canvas></div></div></div>
@@ -236,18 +241,22 @@
                 </div>
             </div>
 
-            <!-- PPE DOCUMENTATION -->
+            <!-- PPE DOCUMENTATION & REPORT -->
             <div id="page-ppe_documentation" class="page-content" style="display:none;">
                 <div class="d-flex justify-content-between align-items-center mb-4">
-                    <h2 class="mb-0 text-lmg fw-bold">Dokumentasi APD</h2>
+                    <h2 class="mb-0 text-lmg fw-bold">Laporan Dokumentasi APD</h2>
                     <div class="dropdown">
-                        <button class="btn btn-success dropdown-toggle" data-bs-toggle="dropdown"><i class="bi bi-download"></i> Export</button>
+                        <button class="btn btn-success btn-lg dropdown-toggle" data-bs-toggle="dropdown"><i class="bi bi-cloud-download"></i> Download Laporan</button>
                         <ul class="dropdown-menu dropdown-menu-end">
-                            <li><a class="dropdown-item" href="#" onclick="exportData('excel')"><i class="bi bi-file-earmark-excel"></i> Excel (.xlsx)</a></li>
-                            <li><a class="dropdown-item" href="#" onclick="exportData('csv')"><i class="bi bi-file-earmark-spreadsheet"></i> CSV</a></li>
-                            <li><a class="dropdown-item" href="#" onclick="exportData('pdf')"><i class="bi bi-file-earmark-pdf"></i> PDF</a></li>
+                            <li><h6 class="dropdown-header">Format Data Tabel</h6></li>
+                            <li><a class="dropdown-item" href="#" onclick="exportData('excel')"><i class="bi bi-file-earmark-excel text-success"></i> Excel (.xlsx)</a></li>
+                            <li><a class="dropdown-item" href="#" onclick="exportData('csv')"><i class="bi bi-file-earmark-spreadsheet text-success"></i> CSV</a></li>
+                            <li><a class="dropdown-item" href="#" onclick="exportData('pdf')"><i class="bi bi-file-earmark-pdf text-danger"></i> PDF</a></li>
                             <li><hr class="dropdown-divider"></li>
-                            <li><a class="dropdown-item" href="#" onclick="window.print()"><i class="bi bi-printer"></i> Print</a></li>
+                            <li><h6 class="dropdown-header">Lampiran Media</h6></li>
+                            <li><a class="dropdown-item" href="#" onclick="downloadPhotosZip()"><i class="bi bi-file-earmark-zip text-warning"></i> Download Semua Foto (ZIP)</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="#" onclick="window.print()"><i class="bi bi-printer"></i> Print Dokumen</a></li>
                         </ul>
                     </div>
                 </div>
@@ -381,6 +390,32 @@
     <div class="modal-footer"><button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button><button type="button" class="btn btn-lmg" onclick="saveUser()">Simpan</button></div>
 </div></div></div>
 
+<!-- MODAL: EDIT DASHBOARD (Admin Only) -->
+<div class="modal fade" id="editDashboardModal" tabindex="-1"><div class="modal-dialog"><div class="modal-content">
+    <div class="modal-header text-white" style="background-color: var(--lmg-blue);">
+        <h5 class="modal-title"><i class="bi bi-pencil-square"></i> Edit Dashboard Stats</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+    </div>
+    <div class="modal-body">
+        <form id="editDashForm">
+            <div class="mb-3"><label class="form-label">Total Dokumen</label><input type="number" class="form-control" id="editDashDocs"></div>
+            <div class="mb-3"><label class="form-label">Stock APD Available</label><input type="number" class="form-control" id="editDashStock"></div>
+        </form>
+    </div>
+    <div class="modal-footer"><button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button><button type="button" class="btn btn-lmg" onclick="saveDashboardSettings()">Simpan</button></div>
+</div></div></div>
+
+<!-- MODAL: IMAGE PREVIEW -->
+<div class="modal fade" id="imagePreviewModal" tabindex="-1"><div class="modal-dialog modal-lg modal-dialog-centered"><div class="modal-content">
+    <div class="modal-header text-white" style="background-color: var(--lmg-dark-blue);">
+        <h5 class="modal-title" id="imagePreviewTitle">Preview Foto</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+    </div>
+    <div class="modal-body text-center">
+        <img id="imagePreviewSrc" src="" alt="Preview" class="img-fluid rounded">
+    </div>
+</div></div></div>
+
 <!-- MODAL: HANDOVER (Serah Terima Otomatis) -->
 <div class="modal fade" id="handoverModal" tabindex="-1"><div class="modal-dialog"><div class="modal-content">
     <div class="modal-header text-white" style="background-color: var(--lmg-blue);">
@@ -432,7 +467,7 @@
 
     let ppeDocumentation = [
         {docNo:"DOC-PPE-001", reqDate:"2023-10-20", name:"Budi Santoso", nik:"1001", dept:"Maintenance", loc:"Workshop B", apd:"Safety Helmet", qty:2, status:"Completed", appSafety:"Approved", appPM:"Approved", appDate:"2023-10-21", handoverDate:"2023-10-22", apdPhoto:"https://via.placeholder.com/40", handoverPhoto:"https://via.placeholder.com/40", note:"Diserahkan langsung"},
-        {docNo:"DOC-PPE-002", reqDate:"2023-10-22", name:"Asep Kurniawan", nik:"1002", dept:"Production", loc:"Line 1", apd:"Safety Shoes", qty:1, status:"Pending Safety", appSafety:"Pending", appPM:"Pending", appDate:"-", handoverDate:"-", apdPhoto:"-", handoverPhoto:"-", note:"Menunggu review safety"},
+        {docNo:"DOC-PPE-002", reqDate:"2023-10-22", name:"Asep Kurniawan", nik:"1002", dept:"Production", loc:"Line 1", apd:"Safety Shoes", qty:1, status:"Pending Safety", appSafety:"Pending", appPM:"Pending", appDate:"-", handoverDate:"-", apdPhoto:"https://via.placeholder.com/40", handoverPhoto:"-", note:"Menunggu review safety"},
         {docNo:"DOC-PPE-003", reqDate:"2023-10-23", name:"Joko Widodo", nik:"1003", dept:"Engineering", loc:"Site A", apd:"Face Shield", qty:3, status:"Pending PM", appSafety:"Approved", appPM:"Pending", appDate:"-", handoverDate:"-", apdPhoto:"https://via.placeholder.com/40", handoverPhoto:"-", note:"Sudah di-approve safety, menunggu PM"}
     ];
 
@@ -443,6 +478,12 @@
     };
     let currentFolder = "root";
     let idleTime = 0;
+    
+    // Dashboard Settings (Editable by Admin)
+    let dashSettings = {
+        totalDocs: 450,
+        stockApd: 320
+    };
 
     // === AUTH & SESSION ===
     document.getElementById('loginForm').addEventListener('submit', function(e) {
@@ -524,9 +565,33 @@
         updateDashboardStats();
     }
 
+    // === DASHBOARD EDIT LOGIC ===
     function updateDashboardStats() {
         document.getElementById('dashTotal').innerText = ppeDocumentation.length;
-        document.getElementById('dashPending').innerText = ppeDocumentation.filter(d => d.status.includes("Pending")).length;
+        document.getElementById('dashPending').innerText = ppeDocumentation.filter(d => d.status.includes("Pending") || d.status === "Siap Serah Terima").length;
+        document.getElementById('dashDocs').innerText = dashSettings.totalDocs;
+        document.getElementById('dashStock').innerText = dashSettings.stockApd;
+    }
+
+    function openEditDashboardModal() {
+        document.getElementById('editDashDocs').value = dashSettings.totalDocs;
+        document.getElementById('editDashStock').value = dashSettings.stockApd;
+        new bootstrap.Modal(document.getElementById('editDashboardModal')).show();
+    }
+
+    function saveDashboardSettings() {
+        dashSettings.totalDocs = parseInt(document.getElementById('editDashDocs').value) || 0;
+        dashSettings.stockApd = parseInt(document.getElementById('editDashStock').value) || 0;
+        logActivity("Mengubah pengaturan Dashboard");
+        updateDashboardStats();
+        bootstrap.Modal.getInstance(document.getElementById('editDashboardModal')).hide();
+    }
+
+    // === IMAGE PREVIEW LOGIC ===
+    function previewImage(url, title) {
+        document.getElementById('imagePreviewTitle').innerText = title || "Preview Foto";
+        document.getElementById('imagePreviewSrc').src = url;
+        new bootstrap.Modal(document.getElementById('imagePreviewModal')).show();
     }
 
     function initChart() {
@@ -566,7 +631,7 @@
             appDate: "-",
             handoverDate: "-",
             apdPhoto: photoApdFile ? URL.createObjectURL(photoApdFile) : "-",
-            handoverPhoto: "-", // Default kosong, menunggu serah terima
+            handoverPhoto: "-",
             note: document.getElementById('reqNote').value || "-"
         };
         
@@ -578,7 +643,7 @@
         renderDocTable(); updateDashboardStats();
     }
 
-    // === APPROVAL SYSTEM & AUTO HANDOVER ===
+    // === APPROVAL SYSTEM & AUTO HANDOVER (WITH PHOTO REVIEW) ===
     function renderApprovalQueues() {
         const safetyQueue = document.getElementById('safetyQueue');
         const pmQueue = document.getElementById('pmQueue');
@@ -590,31 +655,39 @@
         const pmPending = ppeDocumentation.filter(d => d.appSafety === "Approved" && d.appPM === "Pending");
 
         if(safetyPending.length > 0) {
-            safetyHtml = safetyPending.map(d => `
-                <div class="card border-warning mb-2"><div class="card-body p-2">
-                    <h6 class="mb-0 text-dark">${d.name} <small class="text-muted">(${d.nik})</small></h6>
-                    <p class="mb-1"><small><b>${d.apd}</b> - ${d.qty} Pcs</small></p>
-                    <p class="mb-2 text-muted" style="font-size: 0.8rem">${d.note}</p>
-                    <div class="d-flex justify-content-end gap-2">
-                        <button class="btn btn-success btn-sm" onclick="approvePPE('${d.docNo}', 'safety', true)"><i class="bi bi-check-lg"></i> Approve</button>
-                        <button class="btn btn-danger btn-sm" onclick="approvePPE('${d.docNo}', 'safety', false)"><i class="bi bi-x-lg"></i> Reject</button>
-                    </div>
-                </div></div>
-            `).join('');
+            safetyHtml = safetyPending.map(d => {
+                let photoHtml = d.apdPhoto !== '-' ? `<img src="${d.apdPhoto}" class="img-thumbnail mb-2" style="max-height: 100px; cursor: pointer;" onclick="previewImage('${d.apdPhoto}', 'Foto APD - ${d.apd}')">` : '<span class="text-muted small">No photo</span>';
+                return `
+                    <div class="card border-warning mb-2"><div class="card-body p-2">
+                        <div class="text-center">${photoHtml}</div>
+                        <h6 class="mb-0 text-dark mt-1">${d.name} <small class="text-muted">(${d.nik})</small></h6>
+                        <p class="mb-1"><small><b>${d.apd}</b> - ${d.qty} Pcs</small></p>
+                        <p class="mb-2 text-muted" style="font-size: 0.8rem">${d.note}</p>
+                        <div class="d-flex justify-content-end gap-2">
+                            <button class="btn btn-success btn-sm" onclick="approvePPE('${d.docNo}', 'safety', true)"><i class="bi bi-check-lg"></i> Approve</button>
+                            <button class="btn btn-danger btn-sm" onclick="approvePPE('${d.docNo}', 'safety', false)"><i class="bi bi-x-lg"></i> Reject</button>
+                        </div>
+                    </div></div>
+                `;
+            }).join('');
         }
 
         if(pmPending.length > 0) {
-            pmHtml = pmPending.map(d => `
-                <div class="card border-primary mb-2"><div class="card-body p-2">
-                    <h6 class="mb-0 text-dark">${d.name} <small class="text-muted">(${d.nik})</small></h6>
-                    <p class="mb-1"><small><b>${d.apd}</b> - ${d.qty} Pcs</small></p>
-                    <p class="mb-2 text-success" style="font-size: 0.8rem"><i class="bi bi-check-circle-fill"></i> Approved by Safety</p>
-                    <div class="d-flex justify-content-end gap-2">
-                        <button class="btn btn-success btn-sm" onclick="approvePPE('${d.docNo}', 'pm', true)"><i class="bi bi-check-lg"></i> Approve</button>
-                        <button class="btn btn-danger btn-sm" onclick="approvePPE('${d.docNo}', 'pm', false)"><i class="bi bi-x-lg"></i> Reject</button>
-                    </div>
-                </div></div>
-            `).join('');
+            pmHtml = pmPending.map(d => {
+                let photoHtml = d.apdPhoto !== '-' ? `<img src="${d.apdPhoto}" class="img-thumbnail mb-2" style="max-height: 100px; cursor: pointer;" onclick="previewImage('${d.apdPhoto}', 'Foto APD - ${d.apd}')">` : '<span class="text-muted small">No photo</span>';
+                return `
+                    <div class="card border-primary mb-2"><div class="card-body p-2">
+                        <div class="text-center">${photoHtml}</div>
+                        <h6 class="mb-0 text-dark mt-1">${d.name} <small class="text-muted">(${d.nik})</small></h6>
+                        <p class="mb-1"><small><b>${d.apd}</b> - ${d.qty} Pcs</small></p>
+                        <p class="mb-2 text-success" style="font-size: 0.8rem"><i class="bi bi-check-circle-fill"></i> Approved by Safety</p>
+                        <div class="d-flex justify-content-end gap-2">
+                            <button class="btn btn-success btn-sm" onclick="approvePPE('${d.docNo}', 'pm', true)"><i class="bi bi-check-lg"></i> Approve</button>
+                            <button class="btn btn-danger btn-sm" onclick="approvePPE('${d.docNo}', 'pm', false)"><i class="bi bi-x-lg"></i> Reject</button>
+                        </div>
+                    </div></div>
+                `;
+            }).join('');
         }
 
         safetyQueue.innerHTML = safetyHtml;
@@ -636,8 +709,8 @@
                 doc.appDate = new Date().toISOString().slice(0,10);
                 logActivity(`Project Manager Approved: ${doc.docNo}`);
                 renderApprovalQueues(); renderDocTable(); updateDashboardStats(); renderHistoryTable();
-                // Otomatis membuka modal serah terima
                 openHandoverModal(doc.docNo);
+                return; 
             } else { 
                 doc.status = "Rejected"; logActivity(`Project Manager Rejected: ${doc.docNo}`); 
             }
@@ -650,11 +723,10 @@
     function renderHistoryTable() {
         const tbody = document.getElementById('historyTableBody');
         tbody.innerHTML = ppeDocumentation.map(t => {
-            let action = `<button class="btn btn-sm btn-outline-primary"><i class="bi bi-eye"></i></button>`;
+            let action = `<button class="btn btn-sm btn-outline-primary" onclick="previewImage('${t.apdPhoto}', 'Foto APD - ${t.docNo}')"><i class="bi bi-eye"></i> Lihat</button>`;
             
-            // Jika status Siap Serah Terima,ampilkan tombol Serah Terima
             if(t.status === "Siap Serah Terima") {
-                action = `<button class="btn btn-sm btn-success" onclick="openHandoverModal('${t.docNo}')"><i class="bi bi-box-arrow-in-down"></i> Serah Terima</button>`;
+                action += ` <button class="btn btn-sm btn-success" onclick="openHandoverModal('${t.docNo}')"><i class="bi bi-box-arrow-in-down"></i> Serah Terima</button>`;
             }
 
             let badge = 'bg-warning text-dark';
@@ -676,7 +748,7 @@
     // === HANDOVER MODAL LOGIC ===
     function openHandoverModal(docNo) {
         document.getElementById('handoverDocNo').value = docNo;
-        document.getElementById('handoverPhotoInput').value = ''; // Kosongkan input lama
+        document.getElementById('handoverPhotoInput').value = ''; 
         new bootstrap.Modal(document.getElementById('handoverModal')).show();
     }
 
@@ -772,46 +844,90 @@
     function renderAuditTrail() { document.getElementById('auditTrailBody').innerHTML = auditTrail.map(a => `<tr><td>${a.time}</td><td class="fw-bold">${a.user}</td><td>${a.action}</td></tr>`).join(''); }
     function renderDashActivity() { const list = auditTrail.slice(0, 5); document.getElementById('dashActivity').innerHTML = list.map(a => `<li class="list-group-item border-0"><i class="bi bi-clock-history text-primary me-2"></i> <small>${a.time}</small> - ${a.action}</li>`).join('') || '<li class="list-group-item border-0 text-muted">Belum ada aktivitas</li>'; }
 
-    // === PPE DOCUMENTATION & EXPORT ===
+    // === PPE DOCUMENTATION, FILTER & EXPORT ===
     function populateFilterAPD() { const select = document.getElementById('filterAPD'); select.innerHTML = '<option value="">Semua</option>'; masterPPE.forEach(p => select.innerHTML += `<option>${p.name}</option>`); }
     function applyFilter() { renderDocTable(); }
-    function renderDocTable() {
+    
+    function getFilteredDocs() {
         let filtered = [...ppeDocumentation];
-        const fDept = document.getElementById('filterDept').value; const fAPD = document.getElementById('filterAPD').value; const fStatus = document.getElementById('filterStatus').value;
+        const fDept = document.getElementById('filterDept').value; 
+        const fAPD = document.getElementById('filterAPD').value; 
+        const fStatus = document.getElementById('filterStatus').value;
         if(fDept) filtered = filtered.filter(d => d.dept === fDept);
         if(fAPD) filtered = filtered.filter(d => d.apd === fAPD);
         if(fStatus) filtered = filtered.filter(d => d.status === fStatus);
+        return filtered;
+    }
 
+    function renderDocTable() {
+        const filtered = getFilteredDocs();
         document.getElementById('docTableBody').innerHTML = filtered.map(d => `
             <tr class="text-center">
                 <td class="fw-bold">${d.docNo}</td><td>${d.reqDate}</td><td>${d.name}</td><td>${d.nik}</td><td>${d.dept}</td><td>${d.loc}</td>
                 <td>${d.apd}</td><td>${d.qty}</td>
                 <td><span class="badge ${d.status === 'Completed' ? 'bg-success' : d.status === 'Rejected' ? 'bg-danger' : d.status === 'Pending PM' ? 'bg-primary' : d.status === 'Siap Serah Terima' ? 'bg-info text-dark' : 'bg-warning text-dark'}">${d.status}</span></td>
                 <td>${d.appDate}</td><td>${d.handoverDate}</td>
-                <td>${d.apdPhoto !== '-' ? `<img src="${d.apdPhoto}" width="30" class="img-thumbnail">` : '-'}</td>
-                <td>${d.handoverPhoto !== '-' ? `<img src="${d.handoverPhoto}" width="30" class="img-thumbnail">` : '-'}</td>
+                <td>${d.apdPhoto !== '-' ? `<img src="${d.apdPhoto}" width="30" class="img-thumbnail" style="cursor:pointer;" onclick="previewImage('${d.apdPhoto}', 'Foto APD')">` : '-'}</td>
+                <td>${d.handoverPhoto !== '-' ? `<img src="${d.handoverPhoto}" width="30" class="img-thumbnail" style="cursor:pointer;" onclick="previewImage('${d.handoverPhoto}', 'Foto Serah Terima')">` : '-'}</td>
                 <td>${d.note}</td>
             </tr>
         `).join('');
     }
 
     function exportData(type) {
-        const rows = document.querySelectorAll('#docTable tbody tr');
-        let data = [];
-        rows.forEach(row => {
-            const cols = row.querySelectorAll('td');
-            data.push({ "No Doc": cols[0].innerText, "Tgl": cols[1].innerText, "Nama": cols[2].innerText, "NIK": cols[3].innerText, "Dept": cols[4].innerText, "Lokasi": cols[5].innerText, "APD": cols[6].innerText, "Jml": cols[7].innerText, "Status": cols[8].innerText, "Tgl Approve": cols[9].innerText, "Tgl Serah Terima": cols[10].innerText, "Catatan": cols[13].innerText });
-        });
+        const data = getFilteredDocs().map(d => ({
+            "No Doc": d.docNo, "Tgl": d.reqDate, "Nama": d.name, "NIK": d.nik, "Dept": d.dept, "Lokasi": d.loc,
+            "APD": d.apd, "Jml": d.qty, "Status": d.status, "Tgl Approve": d.appDate, "Tgl Serah Terima": d.handoverDate, "Catatan": d.note
+        }));
+
         if(type === 'excel') {
-            const ws = XLSX.utils.json_to_sheet(data); const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, "Dokumentasi APD"); XLSX.writeFile(wb, "Dokumentasi_APD_LMI.xlsx");
+            const ws = XLSX.utils.json_to_sheet(data); const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, "Dokumentasi APD"); XLSX.writeFile(wb, "Laporan_Dokumentasi_APD.xlsx");
         } else if(type === 'csv') {
-            const ws = XLSX.utils.json_to_sheet(data); const csv = XLSX.utils.sheet_to_csv(ws); const blob = new Blob([csv], {type: "text/csv;charset=utf-8;"}); const link = document.createElement("a"); link.href = URL.createObjectURL(blob); link.download = "Dokumentasi_APD_LMI.csv"; link.click();
+            const ws = XLSX.utils.json_to_sheet(data); const csv = XLSX.utils.sheet_to_csv(ws); const blob = new Blob([csv], {type: "text/csv;charset=utf-8;"}); const link = document.createElement("a"); link.href = URL.createObjectURL(blob); link.download = "Laporan_Dokumentasi_APD.csv"; link.click();
         } else if(type === 'pdf') {
             const { jsPDF } = window.jspdf; const doc = new jsPDF('l', 'mm', 'a4');
             doc.autoTable({ head: [["No Doc", "Tgl", "Nama", "NIK", "Dept", "APD", "Jml", "Status", "Tgl Approve", "Tgl Serah Terima"]], body: data.map(d => [d["No Doc"], d["Tgl"], d["Nama"], d["NIK"], d["Dept"], d["APD"], d["Jml"], d["Status"], d["Tgl Approve"], d["Tgl Serah Terima"]]), styles: { fontSize: 8, cellPadding: 2 }, headStyles: { fillColor: [0, 91, 170] } });
-            doc.save("Dokumentasi_APD_LMI.pdf");
+            doc.save("Laporan_Dokumentasi_APD.pdf");
         }
-        logActivity(`Export data dokumentasi APD ke ${type.toUpperCase()}`);
+        logActivity(`Export laporan dokumentasi APD ke ${type.toUpperCase()}`);
+    }
+
+    // === DOWNLOAD PHOTOS AS ZIP ===
+    async function downloadPhotosZip() {
+        const filtered = getFilteredDocs();
+        const zip = new JSZip();
+        let count = 0;
+
+        for(const d of filtered) {
+            if(d.apdPhoto && d.apdPhoto !== '-') {
+                try {
+                    const response = await fetch(d.apdPhoto);
+                    const blob = await response.blob();
+                    zip.file(`${d.docNo}_Foto_APD.jpg`, blob);
+                    count++;
+                } catch(e) { console.error("Error fetching APD photo:", e); }
+            }
+            if(d.handoverPhoto && d.handoverPhoto !== '-') {
+                try {
+                    const response = await fetch(d.handoverPhoto);
+                    const blob = await response.blob();
+                    zip.file(`${d.docNo}_Foto_Serah_Terima.jpg`, blob);
+                    count++;
+                } catch(e) { console.error("Error fetching Handover photo:", e); }
+            }
+        }
+
+        if(count > 0) {
+            zip.generateAsync({type:"blob"}).then(function(content) {
+                const link = document.createElement("a");
+                link.href = URL.createObjectURL(content);
+                link.download = "Foto_Dokumentasi_APD.zip";
+                link.click();
+                logActivity("Download Foto Dokumentasi APD (ZIP)");
+            });
+        } else {
+            alert("Tidak ada foto ditemukan pada filter saat ini.");
+        }
     }
 
     // === DOC EXPLORER ===
