@@ -4,117 +4,57 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>LMI PPE & Document Management System</title>
-    <!-- Favicon Logo -->
     <link rel="icon" href="https://z-cdn-media.chatglm.cn/files/342ceaed-a660-458e-b047-e67a5cbb28e5.png?auth_key=1885598233-b68f40e8beec4c8583a02cb62d86b7d5-0-a1c6bcf6e07beb253537467835f04c6f" type="image/png">
-    <!-- Bootstrap 5 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <!-- Bootstrap Icons -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
-    <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Library Export -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
     <style>
         :root {
             --lmg-yellow: #FFD100;
-            --lmg-blue: #005baa; /* LiuGong Blue */
+            --lmg-blue: #005baa;
             --lmg-dark-blue: #003366;
             --lmg-light-blue: #e3f2fd;
         }
-        body { 
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
-            background: linear-gradient(135deg, #ffffff 0%, #e3f2fd 100%); 
-            min-height: 100vh;
-        }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: linear-gradient(135deg, #ffffff 0%, #e3f2fd 100%); min-height: 100vh; }
         .text-lmg { color: var(--lmg-blue); }
         .btn-lmg { background-color: var(--lmg-blue); color: #ffffff; font-weight: bold; transition: 0.3s; }
         .btn-lmg:hover { background-color: var(--lmg-dark-blue); color: var(--lmg-yellow); }
         
-        /* Login CSS */
-        .login-wrapper { 
-            height: 100vh; 
-            display: flex; 
-            align-items: center; 
-            justify-content: center; 
-            background: linear-gradient(135deg, #ffffff 0%, #cce7ff 100%); 
-        }
-        .login-card { 
-            width: 420px; 
-            border: none; 
-            border-radius: 15px; 
-            box-shadow: 0 10px 30px rgba(0, 91, 170, 0.15); 
-            overflow: hidden;
-        }
-        .login-logo { 
-            background: #ffffff; 
-            padding: 25px; 
-            text-align: center; 
-            border-bottom: 1px solid #eee; 
-        }
+        .login-wrapper { height: 100vh; display: flex; align-items: center; justify-content: center; background: linear-gradient(135deg, #ffffff 0%, #cce7ff 100%); }
+        .login-card { width: 420px; border: none; border-radius: 15px; box-shadow: 0 10px 30px rgba(0, 91, 170, 0.15); overflow: hidden; }
+        .login-logo { background: #ffffff; padding: 25px; text-align: center; border-bottom: 1px solid #eee; }
         .login-logo img { max-height: 60px; width: auto; }
         
-        /* Sidebar CSS */
         .wrapper { display: flex; min-height: 100vh; }
-        .sidebar { 
-            width: 260px; 
-            background-color: #ffffff; 
-            color: var(--lmg-dark-blue); 
-            transition: all 0.3s; 
-            border-right: 1px solid #e0e0e0;
-            box-shadow: 2px 0 10px rgba(0,0,0,0.05);
-        }
+        .sidebar { width: 260px; background-color: #ffffff; color: var(--lmg-dark-blue); transition: all 0.3s; border-right: 1px solid #e0e0e0; box-shadow: 2px 0 10px rgba(0,0,0,0.05); position: fixed; height: 100vh; overflow-y: auto; z-index: 1000; }
         .sidebar.hidden { margin-left: -260px; }
-        .sidebar-header { 
-            padding: 15px; 
-            background: #ffffff; 
-            text-align: center; 
-            border-bottom: 4px solid var(--lmg-yellow); 
-        }
+        .sidebar-header { padding: 15px; background: #ffffff; text-align: center; border-bottom: 4px solid var(--lmg-yellow); }
         .sidebar-header img { max-height: 40px; width: auto; }
         .sidebar-menu { padding: 15px 0; }
         .sidebar-menu h6 { color: #888; font-weight: bold; }
-        .sidebar-menu a { 
-            display: flex; 
-            align-items: center; 
-            padding: 12px 20px; 
-            color: #555; 
-            text-decoration: none; 
-            transition: 0.3s; 
-            border-left: 4px solid transparent;
-        }
-        .sidebar-menu a:hover, .sidebar-menu a.active { 
-            background-color: var(--lmg-light-blue); 
-            color: var(--lmg-blue); 
-            border-left: 4px solid var(--lmg-blue); 
-            font-weight: bold;
-        }
+        .sidebar-menu a { display: flex; align-items: center; padding: 12px 20px; color: #555; text-decoration: none; transition: 0.3s; border-left: 4px solid transparent; cursor: pointer; }
+        .sidebar-menu a:hover, .sidebar-menu a.active { background-color: var(--lmg-light-blue); color: var(--lmg-blue); border-left: 4px solid var(--lmg-blue); font-weight: bold; }
         .sidebar-menu a i { margin-right: 10px; font-size: 1.2rem; }
         
-        .content { flex: 1; overflow-x: hidden; }
-        .navbar-top { 
-            background-color: white; 
-            padding: 15px 25px; 
-            display: flex; 
-            justify-content: space-between; 
-            align-items: center; 
-            box-shadow: 0 2px 10px rgba(0,0,0,0.05); 
-        }
+        .content { flex: 1; margin-left: 260px; transition: margin 0.3s; }
+        .content.full { margin-left: 0; }
+        .navbar-top { background-color: white; padding: 15px 25px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 10px rgba(0,0,0,0.05); position: sticky; top: 0; z-index: 999; }
         
         .card { border: none; border-radius: 10px; box-shadow: 0 4px 20px rgba(0,0,0,0.03); }
         .card-stat { border-left: 5px solid var(--lmg-blue); }
         .card-header { background-color: white; border-bottom: 1px solid #eee; font-weight: bold; color: var(--lmg-dark-blue); }
         
-        .drop-zone { 
-            border: 2px dashed var(--lmg-blue); 
-            padding: 40px; 
-            text-align: center; 
-            border-radius: 10px; 
-            background: #f8fbff; 
-            cursor: pointer; 
-            transition: 0.3s;
-        }
-        .drop-zone:hover, .drop-zone.dragover { 
-            border-color: var(--lmg-yellow); 
-            background: #fffdf0; 
-        }
+        .drive-item { cursor: pointer; transition: transform 0.2s; }
+        .drive-item:hover { transform: translateY(-5px); }
+        .drive-item .card-body { text-align: center; }
+        .breadcrumb-drive { background: #f8f9fa; padding: 10px 15px; border-radius: 5px; margin-bottom: 20px; }
+        
+        .drop-zone { border: 2px dashed var(--lmg-blue); padding: 40px; text-align: center; border-radius: 10px; background: #f8fbff; cursor: pointer; transition: 0.3s; }
+        .drop-zone:hover, .drop-zone.dragover { border-color: var(--lmg-yellow); background: #fffdf0; }
         .table thead th { background-color: var(--lmg-dark-blue); color: white; }
     </style>
 </head>
@@ -134,14 +74,14 @@
                     <label class="form-label">Email / Username</label>
                     <div class="input-group">
                         <span class="input-group-text bg-light"><i class="bi bi-person"></i></span>
-                        <input type="text" class="form-control" id="username" required value="admin@liugong.co.id">
+                        <input type="text" class="form-control" id="username" required placeholder="Masukkan username">
                     </div>
                 </div>
                 <div class="mb-3">
                     <label class="form-label">Password</label>
                     <div class="input-group">
                         <span class="input-group-text bg-light"><i class="bi bi-lock"></i></span>
-                        <input type="password" class="form-control" id="password" required value="admin123">
+                        <input type="password" class="form-control" id="password" required placeholder="Masukkan password">
                         <button class="btn btn-outline-secondary" type="button" id="togglePass"><i class="bi bi-eye"></i></button>
                     </div>
                 </div>
@@ -157,32 +97,34 @@
 
 <!-- MAIN APP VIEW -->
 <div id="appView" class="wrapper" style="display: none;">
-    <!-- Sidebar -->
     <nav class="sidebar" id="sidebar">
         <div class="sidebar-header">
             <img src="https://z-cdn-media.chatglm.cn/files/342ceaed-a660-458e-b047-e67a5cbb28e5.png?auth_key=1885598233-b68f40e8beec4c8583a02cb62d86b7d5-0-a1c6bcf6e07beb253537467835f04c6f" alt="LiuGong Logo">
         </div>
         <div class="sidebar-menu">
-            <a href="#" class="active" onclick="showPage('dashboard', event)"><i class="bi bi-speedometer2"></i> Dashboard</a>
+            <a class="active" onclick="showPage('dashboard', this)"><i class="bi bi-speedometer2"></i> Dashboard</a>
             
             <h6 class="text-muted ms-3 mt-3 text-uppercase" style="font-size: 0.7rem;">PPE Management</h6>
-            <a href="#" onclick="showPage('ppe_form', event)"><i class="bi bi-file-earmark-plus"></i> Pengajuan APD</a>
-            <a href="#" onclick="showPage('ppe_history', event)"><i class="bi bi-clock-history"></i> Riwayat Pengajuan</a>
-            <a href="#" onclick="showPage('ppe_approval', event)"><i class="bi bi-check2-square"></i> Approval</a>
-            <a href="#" onclick="showPage('ppe_stock', event)"><i class="bi bi-box-seam"></i> Stock APD</a>
+            <a onclick="showPage('ppe_form', this)"><i class="bi bi-file-earmark-plus"></i> Pengajuan APD</a>
+            <a onclick="showPage('ppe_history', this)"><i class="bi bi-clock-history"></i> Riwayat Pengajuan</a>
+            <a onclick="showPage('ppe_approval', this)"><i class="bi bi-check2-square"></i> Approval APD</a>
+            <a onclick="showPage('ppe_documentation', this)"><i class="bi bi-clipboard-data"></i> Dokumentasi APD</a>
             
             <h6 class="text-muted ms-3 mt-3 text-uppercase" style="font-size: 0.7rem;">Document Storage</h6>
-            <a href="#" onclick="showPage('doc_folder', event)"><i class="bi bi-folder2"></i> Folder</a>
-            <a href="#" onclick="showPage('doc_upload', event)"><i class="bi bi-cloud-upload"></i> Upload Dokumen</a>
+            <a onclick="showPage('doc_explorer', this)"><i class="bi bi-folder2-open"></i> Document Explorer</a>
+
+            <h6 class="text-muted ms-3 mt-3 text-uppercase" style="font-size: 0.7rem;">System (Admin)</h6>
+            <a onclick="showPage('master_ppe', this)" class="admin-only"><i class="bi bi-gear-fill"></i> Master PPE</a>
+            <a onclick="showPage('user_management', this)" class="admin-only"><i class="bi bi-people-fill"></i> Manajemen User</a>
+            <a onclick="showPage('audit_trail', this)" class="admin-only"><i class="bi bi-shield-check"></i> Audit Trail</a>
         </div>
     </nav>
 
-    <!-- Content -->
-    <div class="content">
-        <!-- Navbar Top -->
+    <div class="content" id="content">
         <div class="navbar-top">
             <button class="btn btn-light border" onclick="toggleSidebar()"><i class="bi bi-list"></i></button>
             <div class="d-flex align-items-center">
+                <span class="text-muted me-3" id="sessionTimer" style="font-size: 0.8rem;"></span>
                 <button class="btn btn-light border position-relative me-3">
                     <i class="bi bi-bell"></i>
                     <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">3</span>
@@ -192,7 +134,7 @@
                         <i class="bi bi-person-circle text-lmg"></i> <span id="userName" class="fw-bold">Admin</span>
                     </button>
                     <ul class="dropdown-menu dropdown-menu-end">
-                        <li><a class="dropdown-item" href="#"><i class="bi bi-gear"></i> Settings</a></li>
+                        <li><a class="dropdown-item" href="#"><i class="bi bi-shield-lock"></i> <span id="userRole">Administrator</span></a></li>
                         <li><hr class="dropdown-divider"></li>
                         <li><a class="dropdown-item text-danger" href="#" onclick="logout()"><i class="bi bi-box-arrow-right"></i> Logout</a></li>
                     </ul>
@@ -200,355 +142,766 @@
             </div>
         </div>
 
-        <!-- Main Content Area -->
         <div class="p-4">
             
-            <!-- DASHBOARD PAGE -->
+            <!-- DASHBOARD -->
             <div id="page-dashboard" class="page-content">
                 <h2 class="mb-4 text-lmg fw-bold">Dashboard</h2>
                 <div class="row g-4">
-                    <div class="col-md-3">
-                        <div class="card card-stat shadow-sm h-100">
-                            <div class="card-body d-flex justify-content-between align-items-center">
-                                <div>
-                                    <h6 class="text-muted mb-1">Total Pengajuan APD</h6>
-                                    <h3 class="mb-0 fw-bold">120</h3>
-                                </div>
-                                <i class="bi bi-file-text fs-1" style="color: var(--lmg-blue)"></i>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-3">
-                        <div class="card card-stat shadow-sm h-100">
-                            <div class="card-body d-flex justify-content-between align-items-center">
-                                <div>
-                                    <h6 class="text-muted mb-1">Pending Approval</h6>
-                                    <h3 class="mb-0 fw-bold">15</h3>
-                                </div>
-                                <i class="bi bi-hourglass-split fs-1" style="color: var(--lmg-yellow)"></i>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-3">
-                        <div class="card card-stat shadow-sm h-100">
-                            <div class="card-body d-flex justify-content-between align-items-center">
-                                <div>
-                                    <h6 class="text-muted mb-1">Total Dokumen</h6>
-                                    <h3 class="mb-0 fw-bold">450</h3>
-                                </div>
-                                <i class="bi bi-folder fs-1" style="color: var(--lmg-blue)"></i>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-3">
-                        <div class="card card-stat shadow-sm h-100">
-                            <div class="card-body d-flex justify-content-between align-items-center">
-                                <div>
-                                    <h6 class="text-muted mb-1">Stock APD Available</h6>
-                                    <h3 class="mb-0 fw-bold">320</h3>
-                                </div>
-                                <i class="bi bi-boxes fs-1" style="color: var(--lmg-yellow)"></i>
-                            </div>
-                        </div>
-                    </div>
+                    <div class="col-md-3"><div class="card card-stat shadow-sm h-100"><div class="card-body d-flex justify-content-between align-items-center"><div><h6 class="text-muted mb-1">Total Pengajuan APD</h6><h3 class="mb-0 fw-bold" id="dashTotal">0</h3></div><i class="bi bi-file-text fs-1" style="color: var(--lmg-blue)"></i></div></div></div>
+                    <div class="col-md-3"><div class="card card-stat shadow-sm h-100"><div class="card-body d-flex justify-content-between align-items-center"><div><h6 class="text-muted mb-1">Pending Approval</h6><h3 class="mb-0 fw-bold" id="dashPending">0</h3></div><i class="bi bi-hourglass-split fs-1" style="color: var(--lmg-yellow)"></i></div></div></div>
+                    <div class="col-md-3"><div class="card card-stat shadow-sm h-100"><div class="card-body d-flex justify-content-between align-items-center"><div><h6 class="text-muted mb-1">Total Dokumen</h6><h3 class="mb-0 fw-bold">450</h3></div><i class="bi bi-folder fs-1" style="color: var(--lmg-blue)"></i></div></div></div>
+                    <div class="col-md-3"><div class="card card-stat shadow-sm h-100"><div class="card-body d-flex justify-content-between align-items-center"><div><h6 class="text-muted mb-1">Stock APD Available</h6><h3 class="mb-0 fw-bold">320</h3></div><i class="bi bi-boxes fs-1" style="color: var(--lmg-yellow)"></i></div></div></div>
                 </div>
-
                 <div class="row mt-4">
-                    <div class="col-md-8">
-                        <div class="card shadow-sm">
-                            <div class="card-header"><h5 class="mb-0">Grafik Pengajuan APD Bulanan</h5></div>
-                            <div class="card-body"><canvas id="ppeChart" height="100"></canvas></div>
-                        </div>
-                    </div>
-                    <div class="col-md-4">
-                        <div class="card shadow-sm">
-                            <div class="card-header"><h5 class="mb-0">Aktivitas Terbaru</h5></div>
-                            <div class="card-body">
-                                <ul class="list-group list-group-flush">
-                                    <li class="list-group-item border-0"><i class="bi bi-upload text-success me-2"></i> Upload SOP Welding.pdf</li>
-                                    <li class="list-group-item border-0"><i class="bi bi-check2 text-primary me-2"></i> APD Approved by PM</li>
-                                    <li class="list-group-item border-0"><i class="bi bi-box text-warning me-2"></i> Stock Helmet updated</li>
-                                    <li class="list-group-item border-0"><i class="bi bi-file-earmark-plus text-danger me-2"></i> New request from Asep</li>
-                                </ul>
-                            </div>
-                        </div>
-                    </div>
+                    <div class="col-md-8"><div class="card shadow-sm"><div class="card-header"><h5 class="mb-0">Grafik Pengajuan APD Bulanan</h5></div><div class="card-body"><canvas id="ppeChart" height="100"></canvas></div></div></div>
+                    <div class="col-md-4"><div class="card shadow-sm"><div class="card-header"><h5 class="mb-0">Aktivitas Terbaru</h5></div><div class="card-body"><ul class="list-group list-group-flush" id="dashActivity"><li class="list-group-item border-0 text-muted">Memuat aktivitas...</li></ul></div></div></div>
                 </div>
             </div>
 
-            <!-- PPE FORM PAGE -->
+            <!-- PPE FORM -->
             <div id="page-ppe_form" class="page-content" style="display:none;">
                 <h2 class="mb-4 text-lmg fw-bold">Form Pengajuan APD</h2>
-                <div class="card shadow-sm">
-                    <div class="card-body p-4">
-                        <form>
-                            <div class="row mb-3">
-                                <div class="col-md-6">
-                                    <label class="form-label text-muted">Nomor Pengajuan (Auto)</label>
-                                    <input type="text" class="form-control" value="PPE-20231025-001" readonly>
-                                </div>
-                                <div class="col-md-6">
-                                    <label class="form-label text-muted">Tanggal</label>
-                                    <input type="date" class="form-control" value="2023-10-25">
-                                </div>
+                <div class="card shadow-sm"><div class="card-body p-4">
+                    <form id="ppeForm" onsubmit="submitPPEForm(event)">
+                        <h5 class="text-lmg mb-3 border-bottom pb-2">Data Pemohon</h5>
+                        <div class="row mb-3">
+                            <div class="col-md-6"><label class="form-label text-muted">Nomor Pengajuan (Auto)</label><input type="text" class="form-control" id="reqNo" readonly></div>
+                            <div class="col-md-6"><label class="form-label text-muted">Tanggal</label><input type="date" class="form-control" id="reqDate" required></div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-md-6"><label class="form-label text-muted">Nama Pemohon</label><input type="text" class="form-control" id="reqName" required placeholder="Nama Lengkap"></div>
+                            <div class="col-md-6"><label class="form-label text-muted">NIK</label><input type="text" class="form-control" id="reqNik" required placeholder="Nomor Induk Karyawan"></div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-md-6"><label class="form-label text-muted">Departemen</label><select class="form-select" id="reqDept" required><option value="">Pilih...</option><option>Maintenance</option><option>Production</option><option>Engineering</option><option>HRGA</option></select></div>
+                            <div class="col-md-6"><label class="form-label text-muted">Lokasi Kerja</label><input type="text" class="form-control" id="reqLoc" required placeholder="Contoh: Workshop B"></div>
+                        </div>
+
+                        <h5 class="text-lmg mb-3 mt-4 border-bottom pb-2">Informasi Permintaan</h5>
+                        <div class="row mb-3">
+                            <div class="col-md-4"><label class="form-label text-muted">Jenis APD</label><select class="form-select" id="ppeSelect" required></select></div>
+                            <div class="col-md-4"><label class="form-label text-muted">Ukuran</label><input type="text" class="form-control" id="ppeSize" placeholder="Tulis manual" required></div>
+                            <div class="col-md-4"><label class="form-label text-muted">Jumlah</label><input type="number" class="form-control" id="ppeQty" placeholder="0" required></div>
+                        </div>
+
+                        <h5 class="text-lmg mb-3 mt-4 border-bottom pb-2">Dokumentasi APD</h5>
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label text-muted">Upload Foto APD</label>
+                                <input type="file" class="form-control" id="photoApd" accept="image/*" required>
                             </div>
-                            <div class="row mb-3">
-                                <div class="col-md-6"><label class="form-label text-muted">Nama Pemohon</label><input type="text" class="form-control" placeholder="Nama Lengkap"></div>
-                                <div class="col-md-6"><label class="form-label text-muted">NIK</label><input type="text" class="form-control" placeholder="Nomor Induk Karyawan"></div>
+                            <div class="col-md-6 d-flex align-items-end">
+                                <small class="text-muted">*Foto Serah Terima akan diunggah setelah persetujuan Project Manager.</small>
                             </div>
-                            <hr class="my-4">
-                            <h5 class="text-lmg mb-3">Informasi Permintaan</h5>
-                            <div class="row mb-3">
-                                <div class="col-md-4"><label class="form-label text-muted">Jenis APD</label><select class="form-select"><option>Helm Safety</option><option>Sepatu Safety</option><option>Sarung Tangan</option></select></div>
-                                <div class="col-md-4"><label class="form-label text-muted">Ukuran</label><input type="text" class="form-control" placeholder="L, XL, 42, dll"></div>
-                                <div class="col-md-4"><label class="form-label text-muted">Jumlah</label><input type="number" class="form-control" placeholder="0"></div>
-                            </div>
-                            <div class="mb-3">
-                                <label class="form-label text-muted">Upload Foto Pendukung (Opsional)</label>
-                                <input type="file" class="form-control">
-                            </div>
-                            <div class="text-end mt-4">
-                                <button type="submit" class="btn btn-lmg px-4">Submit Pengajuan</button>
-                            </div>
-                        </form>
-                    </div>
-                </div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-md-12"><label class="form-label text-muted">Catatan</label><textarea class="form-control" id="reqNote" rows="4" placeholder="Catatan tambahan..."></textarea></div>
+                        </div>
+                        
+                        <div class="text-end mt-4">
+                            <button type="submit" class="btn btn-lmg px-4">Submit Pengajuan</button>
+                        </div>
+                    </form>
+                </div></div>
             </div>
 
-            <!-- PPE HISTORY PAGE -->
+            <!-- PPE HISTORY -->
             <div id="page-ppe_history" class="page-content" style="display:none;">
                 <h2 class="mb-4 text-lmg fw-bold">Riwayat Pengajuan APD</h2>
-                <div class="card shadow-sm">
-                    <div class="card-body">
-                        <table class="table table-hover align-middle">
-                            <thead>
-                                <tr><th>No. Pengajuan</th><th>Tanggal</th><th>Nama</th><th>APD</th><th>Status</th><th class="text-end">Aksi</th></tr>
-                            </thead>
-                            <tbody>
-                                <tr>
-                                    <td class="fw-bold">PPE-20231025-001</td><td>25-10-2023</td><td>Budi Santoso</td><td>Helm Safety</td>
-                                    <td><span class="badge bg-warning text-dark">Pending</span></td>
-                                    <td class="text-end"><button class="btn btn-sm btn-outline-primary"><i class="bi bi-eye"></i> Detail</button></td>
-                                </tr>
-                                <tr>
-                                    <td class="fw-bold">PPE-20231024-002</td><td>24-10-2023</td><td>Asep Kurniawan</td><td>Sepatu Safety</td>
-                                    <td><span class="badge bg-success">Completed</span></td>
-                                    <td class="text-end"><button class="btn btn-sm btn-outline-primary"><i class="bi bi-eye"></i> Detail</button></td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
+                <div class="card shadow-sm"><div class="card-body">
+                    <table class="table table-hover align-middle">
+                        <thead><tr><th>No. Dokumentasi</th><th>Tanggal</th><th>Nama</th><th>APD</th><th>Status</th><th class="text-end">Aksi</th></tr></thead>
+                        <tbody id="historyTableBody"></tbody>
+                    </table>
+                </div></div>
             </div>
 
-            <!-- PPE APPROVAL PAGE -->
+            <!-- PPE APPROVAL (Multi-Level) -->
             <div id="page-ppe_approval" class="page-content" style="display:none;">
-                <h2 class="mb-4 text-lmg fw-bold">Approval APD</h2>
+                <h2 class="mb-4 text-lmg fw-bold">Approval APD (Multi-Level)</h2>
+                <div class="row g-4">
+                    <div class="col-md-6">
+                        <div class="card shadow-sm h-100">
+                            <div class="card-header bg-warning text-dark"><h5 class="mb-0"><i class="bi bi-shield-exclamation"></i> Review Safety Coordinator</h5></div>
+                            <div class="card-body"><div id="safetyQueue"></div></div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="card shadow-sm h-100">
+                            <div class="card-header bg-primary text-white"><h5 class="mb-0"><i class="bi bi-person-badge"></i> Approval Project Manager</h5></div>
+                            <div class="card-body"><div id="pmQueue"></div></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- PPE DOCUMENTATION -->
+            <div id="page-ppe_documentation" class="page-content" style="display:none;">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h2 class="mb-0 text-lmg fw-bold">Dokumentasi APD</h2>
+                    <div class="dropdown">
+                        <button class="btn btn-success dropdown-toggle" data-bs-toggle="dropdown"><i class="bi bi-download"></i> Export</button>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            <li><a class="dropdown-item" href="#" onclick="exportData('excel')"><i class="bi bi-file-earmark-excel"></i> Excel (.xlsx)</a></li>
+                            <li><a class="dropdown-item" href="#" onclick="exportData('csv')"><i class="bi bi-file-earmark-spreadsheet"></i> CSV</a></li>
+                            <li><a class="dropdown-item" href="#" onclick="exportData('pdf')"><i class="bi bi-file-earmark-pdf"></i> PDF</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="#" onclick="window.print()"><i class="bi bi-printer"></i> Print</a></li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <div class="card shadow-sm mb-3">
+                    <div class="card-body">
+                        <div class="row g-2 align-items-end">
+                            <div class="col-md-2"><label class="form-label text-muted small">Dari Tanggal</label><input type="date" class="form-control form-control-sm" id="filterStart"></div>
+                            <div class="col-md-2"><label class="form-label text-muted small">Sampai Tanggal</label><input type="date" class="form-control form-control-sm" id="filterEnd"></div>
+                            <div class="col-md-2"><label class="form-label text-muted small">Departemen</label><select class="form-select form-select-sm" id="filterDept"><option value="">Semua</option><option>Maintenance</option><option>Production</option><option>Engineering</option></select></div>
+                            <div class="col-md-2"><label class="form-label text-muted small">Jenis APD</label><select class="form-select form-select-sm" id="filterAPD"><option value="">Semua</option></select></div>
+                            <div class="col-md-2"><label class="form-label text-muted small">Status</label><select class="form-select form-select-sm" id="filterStatus"><option value="">Semua</option><option>Pending Safety</option><option>Pending PM</option><option>Siap Serah Terima</option><option>Completed</option><option>Rejected</option></select></div>
+                            <div class="col-md-2"><button class="btn btn-primary btn-sm w-100" onclick="applyFilter()"><i class="bi bi-funnel"></i> Filter</button></div>
+                        </div>
+                    </div>
+                </div>
+
                 <div class="card shadow-sm">
                     <div class="card-body">
-                        <div class="alert alert-info d-flex align-items-center" role="alert">
-                            <i class="bi bi-info-circle-fill me-2"></i>
-                            <div>Menunggu Approval dari Safety Coordinator</div>
-                        </div>
-                        <table class="table align-middle">
-                            <thead><tr><th>Nama</th><th>APD</th><th>Jumlah</th><th class="text-end">Aksi</th></tr></thead>
-                            <tbody>
-                                <tr><td>Budi Santoso</td><td>Helm Safety</td><td>2 Pcs</td><td class="text-end"><button class="btn btn-success btn-sm me-2"><i class="bi bi-check-lg"></i> Approve</button> <button class="btn btn-danger btn-sm"><i class="bi bi-x-lg"></i> Reject</button></td></tr>
-                            </tbody>
+                        <table class="table table-bordered align-middle table-sm" id="docTable">
+                            <thead class="table-light text-center">
+                                <tr>
+                                    <th>No Doc</th><th>Tgl Pengajuan</th><th>Nama</th><th>NIK</th><th>Dept</th><th>Lokasi</th>
+                                    <th>Jenis APD</th><th>Jumlah</th><th>Status</th><th>Tgl Approve</th><th>Tgl Serah Terima</th>
+                                    <th>Foto APD</th><th>Foto Serah Terima</th><th>Catatan</th>
+                                </tr>
+                            </thead>
+                            <tbody id="docTableBody"></tbody>
                         </table>
                     </div>
                 </div>
             </div>
 
-            <!-- PPE STOCK PAGE -->
-            <div id="page-ppe_stock" class="page-content" style="display:none;">
-                <h2 class="mb-4 text-lmg fw-bold">Master & Stock APD</h2>
-                <div class="card shadow-sm">
-                    <div class="card-body">
-                        <div class="text-end mb-3">
-                            <button class="btn btn-lmg"><i class="bi bi-plus-lg"></i> Tambah APD</button>
-                        </div>
-                        <table class="table table-bordered align-middle">
-                            <thead class="table-light"><tr><th>Nama APD</th><th>Kategori</th><th>Stock</th><th>Min Stock</th><th>Status</th></tr></thead>
-                            <tbody>
-                                <tr><td class="fw-bold">Helm MSA V-Gard</td><td>Head Protection</td><td>50</td><td>10</td><td><span class="badge bg-success">Aman</span></td></tr>
-                                <tr><td class="fw-bold">Sepatu Cheetah</td><td>Foot Protection</td><td>5</td><td>10</td><td><span class="badge bg-danger">Order Ulang</span></td></tr>
-                            </tbody>
-                        </table>
-                    </div>
+            <!-- MASTER PPE -->
+            <div id="page-master_ppe" class="page-content" style="display:none;">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h2 class="mb-0 text-lmg fw-bold">Master PPE Management</h2>
+                    <div><button class="btn btn-warning text-dark" onclick="openCategoryModal()"><i class="bi bi-tags"></i> Kategori</button><button class="btn btn-lmg ms-2" onclick="openPPEModal()"><i class="bi bi-plus-lg"></i> Tambah PPE</button></div>
                 </div>
+                <div class="card shadow-sm"><div class="card-body">
+                    <table class="table table-hover align-middle">
+                        <thead><tr><th>Foto</th><th>Nama APD</th><th>Kategori</th><th>Stock</th><th>Vendor</th><th>Harga</th><th>Status</th><th>Aksi</th></tr></thead>
+                        <tbody id="ppeMasterTable"></tbody>
+                    </table>
+                </div></div>
             </div>
 
-            <!-- DOC FOLDER PAGE -->
-            <div id="page-doc_folder" class="page-content" style="display:none;">
-                <h2 class="mb-4 text-lmg fw-bold">Document Folder Management</h2>
-                <div class="row">
-                    <div class="col-md-3 mb-4">
-                        <div class="card shadow-sm text-center p-4 h-100 hover-shadow">
-                            <i class="bi bi-folder-fill" style="font-size: 4rem; color: var(--lmg-yellow);"></i>
-                            <h6 class="mt-3 mb-0 fw-bold">SOP</h6>
-                            <small class="text-muted">15 Files</small>
-                            <div class="mt-3"><button class="btn btn-sm btn-outline-primary w-100"><i class="bi bi-folder2-open"></i> Buka</button></div>
-                        </div>
-                    </div>
-                    <div class="col-md-3 mb-4">
-                        <div class="card shadow-sm text-center p-4 h-100 hover-shadow">
-                            <i class="bi bi-folder-fill" style="font-size: 4rem; color: var(--lmg-yellow);"></i>
-                            <h6 class="mt-3 mb-0 fw-bold">Work Instruction</h6>
-                            <small class="text-muted">8 Files</small>
-                            <div class="mt-3"><button class="btn btn-sm btn-outline-primary w-100"><i class="bi bi-folder2-open"></i> Buka</button></div>
-                        </div>
-                    </div>
-                    <div class="col-md-3 mb-4">
-                        <div class="card shadow-sm text-center p-4 h-100 hover-shadow">
-                            <i class="bi bi-folder-fill" style="font-size: 4rem; color: var(--lmg-yellow);"></i>
-                            <h6 class="mt-3 mb-0 fw-bold">JSEA</h6>
-                            <small class="text-muted">22 Files</small>
-                            <div class="mt-3"><button class="btn btn-sm btn-outline-primary w-100"><i class="bi bi-folder2-open"></i> Buka</button></div>
-                        </div>
-                    </div>
-                    <div class="col-md-3 mb-4">
-                        <div class="card shadow-sm text-center p-4 h-100 hover-shadow">
-                            <i class="bi bi-folder-fill" style="font-size: 4rem; color: var(--lmg-yellow);"></i>
-                            <h6 class="mt-3 mb-0 fw-bold">HIRA</h6>
-                            <small class="text-muted">5 Files</small>
-                            <div class="mt-3"><button class="btn btn-sm btn-outline-primary w-100"><i class="bi bi-folder2-open"></i> Buka</button></div>
-                        </div>
-                    </div>
+            <!-- USER MANAGEMENT -->
+            <div id="page-user_management" class="page-content" style="display:none;">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h2 class="mb-0 text-lmg fw-bold">Manajemen Pengguna</h2>
+                    <button class="btn btn-lmg" onclick="openUserModal()"><i class="bi bi-person-plus"></i> Tambah User</button>
                 </div>
+                <div class="card shadow-sm"><div class="card-body">
+                    <table class="table table-hover align-middle">
+                        <thead><tr><th>Nama</th><th>Username</th><th>Role</th><th>Password</th><th>Aksi</th></tr></thead>
+                        <tbody id="userTableBody"></tbody>
+                    </table>
+                </div></div>
             </div>
 
-            <!-- DOC UPLOAD PAGE -->
-            <div id="page-doc_upload" class="page-content" style="display:none;">
-                <h2 class="mb-4 text-lmg fw-bold">Upload Dokumen</h2>
-                <div class="card shadow-sm">
-                    <div class="card-body p-4">
-                        <div class="drop-zone" id="dropZone">
-                            <i class="bi bi-cloud-arrow-up" style="font-size: 4rem; color: var(--lmg-blue);"></i>
-                            <h5 class="mt-2 text-lmg">Drag & Drop file di sini atau klik untuk browse</h5>
-                            <p class="text-muted mb-0">Format: PDF, DOCX, XLSX, JPG, PNG, ZIP | Maksimal 20MB</p>
-                            <input type="file" id="fileInput" style="display:none;" multiple>
-                        </div>
-                        <div class="mt-4">
-                            <h6 class="text-muted">File siap diunggah:</h6>
-                            <ul class="list-group" id="fileList">
-                                <li class="list-group-item text-muted text-center border-0">Belum ada file dipilih</li>
-                            </ul>
-                        </div>
-                        <div class="text-end mt-4">
-                            <button class="btn btn-lmg px-4">Start Upload</button>
-                        </div>
+            <!-- AUDIT TRAIL -->
+            <div id="page-audit_trail" class="page-content" style="display:none;">
+                <h2 class="mb-4 text-lmg fw-bold">Audit Trail (Riwayat Aktivitas)</h2>
+                <div class="card shadow-sm"><div class="card-body">
+                    <table class="table table-sm table-hover">
+                        <thead><tr><th>Waktu</th><th>User</th><th>Aktivitas</th></tr></thead>
+                        <tbody id="auditTrailBody"></tbody>
+                    </table>
+                </div></div>
+            </div>
+
+            <!-- DOCUMENT EXPLORER -->
+            <div id="page-doc_explorer" class="page-content" style="display:none;">
+                 <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h2 class="mb-0 text-lmg fw-bold">Document Storage</h2>
+                    <div class="d-flex">
+                        <input type="text" class="form-control me-2" placeholder="Cari file atau folder..." id="docSearchInput" oninput="renderExplorer()">
+                        <button class="btn btn-warning text-dark me-2 admin-only" style="display: none;" onclick="createFolder()"><i class="bi bi-folder-plus"></i> Folder</button>
+                        <button class="btn btn-lmg admin-only" style="display: none;" onclick="document.getElementById('fileInputHidden').click()"><i class="bi bi-cloud-upload"></i> Upload</button>
+                        <input type="file" id="fileInputHidden" style="display:none;" multiple onchange="handleFileUpload(this.files)">
                     </div>
                 </div>
+                <div class="drop-zone mb-4 admin-only" id="dropZone" style="display: none;" onclick="document.getElementById('fileInputHidden').click()">
+                    <i class="bi bi-cloud-arrow-up" style="font-size: 2.5rem; color: var(--lmg-blue);"></i>
+                    <h6 class="mt-2 mb-0 text-lmg">Drag & Drop file di sini (Admin Only)</h6>
+                </div>
+                <nav aria-label="breadcrumb" class="breadcrumb-drive">
+                    <ol class="breadcrumb mb-0" id="breadcrumbNav"><li class="breadcrumb-item"><a href="#" onclick="navigateTo(-1)"><i class="bi bi-house-door"></i> Home</a></li></ol>
+                </nav>
+                <div class="row" id="explorerGrid"></div>
             </div>
 
         </div>
     </div>
 </div>
 
-<!-- Bootstrap JS -->
+<!-- MODALS -->
+<div class="modal fade" id="ppeModal" tabindex="-1"><div class="modal-dialog"><div class="modal-content">
+    <div class="modal-header text-white" style="background-color: var(--lmg-blue);"><h5 class="modal-title" id="ppeModalTitle">Tambah PPE</h5><button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button></div>
+    <div class="modal-body">
+        <form id="ppeMasterForm">
+            <input type="hidden" id="ppeId">
+            <div class="mb-3"><label class="form-label">Nama APD</label><input type="text" class="form-control" id="ppeName" required></div>
+            <div class="mb-3"><label class="form-label">Kategori</label><select class="form-select" id="ppeCategory"></select></div>
+            <div class="row"><div class="col-md-6 mb-3"><label class="form-label">Ukuran</label><input type="text" class="form-control" id="ppeSizeInput"></div><div class="col-md-6 mb-3"><label class="form-label">Stock</label><input type="number" class="form-control" id="ppeStock"></div></div>
+            <div class="row"><div class="col-md-6 mb-3"><label class="form-label">Vendor</label><input type="text" class="form-control" id="ppeVendor"></div><div class="col-md-6 mb-3"><label class="form-label">Harga (Rp)</label><input type="number" class="form-control" id="ppePrice"></div></div>
+            <div class="mb-3"><label class="form-label">Foto APD (URL)</label><input type="text" class="form-control" id="ppePhoto" placeholder="https://..."></div>
+            <div class="form-check mb-3"><input type="checkbox" class="form-check-input" id="ppeStatus" checked><label class="form-check-label">Status Aktif</label></div>
+        </form>
+    </div>
+    <div class="modal-footer"><button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button><button type="button" class="btn btn-lmg" onclick="savePPE()">Simpan</button></div>
+</div></div></div>
+
+<div class="modal fade" id="categoryModal" tabindex="-1"><div class="modal-dialog"><div class="modal-content">
+    <div class="modal-header bg-warning text-dark"><h5 class="modal-title">Kelola Kategori PPE</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+    <div class="modal-body"><div class="input-group mb-3"><input type="text" class="form-control" id="newCatName" placeholder="Nama kategori baru"><button class="btn btn-lmg" onclick="addCategory()">Tambah</button></div><ul class="list-group" id="catList"></ul></div>
+</div></div></div>
+
+<div class="modal fade" id="userModal" tabindex="-1"><div class="modal-dialog"><div class="modal-content">
+    <div class="modal-header text-white" style="background-color: var(--lmg-blue);"><h5 class="modal-title" id="userModalTitle">Tambah User</h5><button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button></div>
+    <div class="modal-body">
+        <form id="userForm">
+            <input type="hidden" id="userId">
+            <div class="mb-3"><label class="form-label">Nama Lengkap</label><input type="text" class="form-control" id="userNameInput" required></div>
+            <div class="mb-3"><label class="form-label">Username</label><input type="text" class="form-control" id="userUsernameInput" required></div>
+            <div class="mb-3"><label class="form-label">Role</label><select class="form-select" id="userRoleInput"><option>Administrator</option><option>Safety Coordinator</option><option>Project Manager</option><option>Admin Gudang</option><option>Employee</option></select></div>
+            <div class="mb-3"><label class="form-label">Password Baru</label><input type="password" class="form-control" id="userPassInput" placeholder="Kosongkan jika tidak ubah"></div>
+        </form>
+    </div>
+    <div class="modal-footer"><button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button><button type="button" class="btn btn-lmg" onclick="saveUser()">Simpan</button></div>
+</div></div></div>
+
+<!-- MODAL: HANDOVER (Serah Terima Otomatis) -->
+<div class="modal fade" id="handoverModal" tabindex="-1"><div class="modal-dialog"><div class="modal-content">
+    <div class="modal-header text-white" style="background-color: var(--lmg-blue);">
+        <h5 class="modal-title"><i class="bi bi-box-arrow-in-down"></i> Serah Terima APD</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+    </div>
+    <div class="modal-body">
+        <form id="handoverForm">
+            <input type="hidden" id="handoverDocNo">
+            <div class="alert alert-info">Pengajuan telah disetujui oleh Project Manager. Silakan unggah foto bukti serah terima untuk menyelesaikan transaksi.</div>
+            <div class="mb-3">
+                <label class="form-label">Upload Foto Serah Terima</label>
+                <input type="file" class="form-control" id="handoverPhotoInput" accept="image/*" required>
+            </div>
+        </form>
+    </div>
+    <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Nanti Saja</button>
+        <button type="button" class="btn btn-lmg" onclick="processHandover()">Konfirmasi Serah Terima</button>
+    </div>
+</div></div></div>
+
+<div class="modal fade" id="docModal" tabindex="-1"><div class="modal-dialog"><div class="modal-content">
+    <div class="modal-header text-white" style="background-color: var(--lmg-blue);"><h5 class="modal-title" id="docModalTitle">File Action</h5><button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button></div>
+    <div class="modal-body" id="docModalBody"></div>
+</div></div></div>
+
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script>
-    // LOGIN LOGIC
+    // === MOCK DATABASE & SESSION ===
+    let users = [
+        {id: 1, name: 'Administrator', username: 'admin', role: 'Administrator', pass: 'admin123'},
+        {id: 2, name: 'Budi Safety', username: 'safety', role: 'Safety Coordinator', pass: 'safety123'},
+        {id: 3, name: 'Joko PM', username: 'pm', role: 'Project Manager', pass: 'pm123'},
+        {id: 4, name: 'Asep User', username: 'user', role: 'Employee', pass: 'user123'}
+    ];
+    let currentUser = null;
+    let ppeCategories = ["Body Protection", "Head Protection", "Eye Protection", "Face Protection", "Foot Protection", "LOTO", "Lainnya"];
+    
+    let masterPPE = [
+        {id:1, name:"Wearpack", cat:"Body Protection", size:"S, M, L, XL", stock:50, vendor:"Vendor A", price:150000, photo:"https://via.placeholder.com/50", active:true},
+        {id:2, name:"Safety Helmet", cat:"Head Protection", size:"L (56-60cm)", stock:120, vendor:"MSA", price:250000, photo:"https://via.placeholder.com/50", active:true},
+        {id:3, name:"Inner Helmet", cat:"Head Protection", size:"Free Size", stock:150, vendor:"MSA", price:35000, photo:"https://via.placeholder.com/50", active:true},
+        {id:4, name:"Safety Glasses", cat:"Eye Protection", size:"Standard", stock:200, vendor:"3M", price:50000, photo:"https://via.placeholder.com/50", active:true},
+        {id:5, name:"Face Shield", cat:"Face Protection", size:"Standard", stock:80, vendor:"3M", price:85000, photo:"https://via.placeholder.com/50", active:true},
+        {id:6, name:"Safety Shoes", cat:"Foot Protection", size:"39, 40, 41, 42, 43", stock:90, vendor:"Cheetah", price:350000, photo:"https://via.placeholder.com/50", active:true},
+        {id:7, name:"LOTO Kit", cat:"LOTO", size:"Set", stock:15, vendor:"Brady", price:1200000, photo:"https://via.placeholder.com/50", active:true}
+    ];
+
+    let ppeDocumentation = [
+        {docNo:"DOC-PPE-001", reqDate:"2023-10-20", name:"Budi Santoso", nik:"1001", dept:"Maintenance", loc:"Workshop B", apd:"Safety Helmet", qty:2, status:"Completed", appSafety:"Approved", appPM:"Approved", appDate:"2023-10-21", handoverDate:"2023-10-22", apdPhoto:"https://via.placeholder.com/40", handoverPhoto:"https://via.placeholder.com/40", note:"Diserahkan langsung"},
+        {docNo:"DOC-PPE-002", reqDate:"2023-10-22", name:"Asep Kurniawan", nik:"1002", dept:"Production", loc:"Line 1", apd:"Safety Shoes", qty:1, status:"Pending Safety", appSafety:"Pending", appPM:"Pending", appDate:"-", handoverDate:"-", apdPhoto:"-", handoverPhoto:"-", note:"Menunggu review safety"},
+        {docNo:"DOC-PPE-003", reqDate:"2023-10-23", name:"Joko Widodo", nik:"1003", dept:"Engineering", loc:"Site A", apd:"Face Shield", qty:3, status:"Pending PM", appSafety:"Approved", appPM:"Pending", appDate:"-", handoverDate:"-", apdPhoto:"https://via.placeholder.com/40", handoverPhoto:"-", note:"Sudah di-approve safety, menunggu PM"}
+    ];
+
+    let auditTrail = [];
+    let fileSystem = {
+        folders: [{id: "f1", name: "SOP", parent: "root"}, {id: "f2", name: "Work Instruction", parent: "root"}, {id: "f3", name: "Welding", parent: "f2"}],
+        files: [{id: "d1", name: "SOP_Crane.pdf", type:"pdf", parent: "f1", size: "2.5 MB"}, {id: "d2", name: "WI_Welding.docx", type:"docx", parent: "f3", size: "1.2 MB"}]
+    };
+    let currentFolder = "root";
+    let idleTime = 0;
+
+    // === AUTH & SESSION ===
     document.getElementById('loginForm').addEventListener('submit', function(e) {
         e.preventDefault();
-        const user = document.getElementById('username').value;
-        const pass = document.getElementById('password').value;
-        if(user && pass) {
+        const u = document.getElementById('username').value;
+        const p = document.getElementById('password').value;
+        const user = users.find(x => x.username === u && x.pass === p);
+        
+        if(user) {
+            currentUser = user;
             document.getElementById('loginView').style.display = 'none';
             document.getElementById('appView').style.display = 'flex';
-            document.getElementById('userName').innerText = user.split('@')[0].charAt(0).toUpperCase() + user.split('@')[0].slice(1);
-            initChart();
+            document.getElementById('userName').innerText = user.name;
+            document.getElementById('userRole').innerText = user.role;
+            
+            if(user.role !== 'Administrator') {
+                document.querySelectorAll('.admin-only').forEach(el => el.style.display = 'none');
+            } else {
+                document.querySelectorAll('.admin-only').forEach(el => el.style.display = ''); 
+            }
+            
+            logActivity("Login ke sistem");
+            initApp();
+            startSessionTimer();
         } else {
-            alert('Invalid credentials');
+            alert('Username atau Password salah!');
         }
-    });
-
-    document.getElementById('togglePass').addEventListener('click', function() {
-        const pass = document.getElementById('password');
-        const icon = this.querySelector('i');
-        if(pass.type === 'password') { pass.type = 'text'; icon.classList.remove('bi-eye'); icon.classList.add('bi-eye-slash'); }
-        else { pass.type = 'password'; icon.classList.remove('bi-eye-slash'); icon.classList.add('bi-eye'); }
     });
 
     function logout() {
-        document.getElementById('appView').style.display = 'none';
-        document.getElementById('loginView').style.display = 'flex';
+        if(currentUser) logActivity("Logout dari sistem");
+        currentUser = null;
+        location.reload();
     }
 
-    // SIDEBAR & PAGE NAVIGATION
-    function toggleSidebar() {
-        document.getElementById('sidebar').classList.toggle('hidden');
+    function startSessionTimer() {
+        const interval = setInterval(() => {
+            idleTime++;
+            const remaining = 900 - idleTime;
+            const min = Math.floor(remaining / 60);
+            const sec = remaining % 60;
+            document.getElementById('sessionTimer').innerText = `Sesi: ${min}m ${sec}s`;
+            if(remaining <= 0) { clearInterval(interval); alert('Sesi berakhir karena tidak ada aktivitas. Auto Logout.'); logout(); }
+        }, 1000);
+        ['mousedown', 'mousemove', 'keypress', 'scroll', 'click'].forEach(evt => document.addEventListener(evt, () => { idleTime = 0; }, false));
     }
 
-    function showPage(pageId, event) {
-        document.querySelectorAll('.page-content').forEach(el => el.style.display = 'none');
+    function logActivity(action) {
+        if(!currentUser) return;
+        const time = new Date().toLocaleString('id-ID');
+        auditTrail.unshift({ time, user: currentUser.name, action });
+        renderAuditTrail(); renderDashActivity();
+    }
+
+    // === NAVIGATION ===
+    function toggleSidebar() { document.getElementById('sidebar').classList.toggle('hidden'); document.getElementById('content').classList.toggle('full'); }
+    function showPage(pageId, el) {
+        document.querySelectorAll('.page-content').forEach(p => p.style.display = 'none');
         document.getElementById('page-' + pageId).style.display = 'block';
-        
-        document.querySelectorAll('.sidebar-menu a').forEach(el => el.classList.remove('active'));
-        if(event) event.target.closest('a').classList.add('active');
+        document.querySelectorAll('.sidebar-menu a').forEach(a => a.classList.remove('active'));
+        if(el) el.classList.add('active');
+        if(pageId === 'ppe_form') { generateReqNo(); }
+        if(pageId === 'ppe_approval') { renderApprovalQueues(); }
+        if(pageId === 'ppe_history') { renderHistoryTable(); }
     }
 
-    // CHART INIT
+    // === INIT ===
+    function initApp() {
+        initChart();
+        renderPPEFormDropdown();
+        renderPPEMasterTable();
+        renderCategoryList();
+        renderDocTable();
+        renderUserTable();
+        renderAuditTrail();
+        renderDashActivity();
+        renderExplorer();
+        populateFilterAPD();
+        updateDashboardStats();
+    }
+
+    function updateDashboardStats() {
+        document.getElementById('dashTotal').innerText = ppeDocumentation.length;
+        document.getElementById('dashPending').innerText = ppeDocumentation.filter(d => d.status.includes("Pending")).length;
+    }
+
     function initChart() {
         const ctx = document.getElementById('ppeChart').getContext('2d');
-        if(window.ppeChartInstance) window.ppeChartInstance.destroy(); // Clear existing chart
-        
+        if(window.ppeChartInstance) window.ppeChartInstance.destroy();
         window.ppeChartInstance = new Chart(ctx, {
             type: 'bar',
-            data: {
-                labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct'],
-                datasets: [{
-                    label: 'Pengajuan APD',
-                    data: [12, 19, 15, 25, 22, 30, 28, 35, 40, 38],
-                    backgroundColor: 'rgba(0, 91, 170, 0.7)',
-                    borderColor: 'rgba(0, 91, 170, 1)',
-                    borderWidth: 1,
-                    borderRadius: 5
-                }]
-            },
-            options: { 
-                scales: { 
-                    y: { beginAtZero: true } 
-                },
-                plugins: {
-                    legend: { display: false }
-                }
-            }
+            data: { labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'], datasets: [{ label: 'Pengajuan', data: [12, 19, 15, 25, 22, 30], backgroundColor: 'rgba(0, 91, 170, 0.7)' }] },
+            options: { plugins: { legend: { display: false } } }
         });
     }
 
-    // DRAG & DROP UPLOAD LOGIC
-    const dropZone = document.getElementById('dropZone');
-    const fileInput = document.getElementById('fileInput');
-    const fileList = document.getElementById('fileList');
+    // === PPE FORM ===
+    function generateReqNo() {
+        const today = new Date();
+        const dateStr = today.toISOString().slice(0,10).replace(/-/g, '');
+        document.getElementById('reqNo').value = `PPE-${dateStr}-${Math.floor(100 + Math.random() * 900)}`;
+        document.getElementById('reqDate').value = today.toISOString().slice(0,10);
+    }
 
-    dropZone.addEventListener('click', () => fileInput.click());
+    function submitPPEForm(e) {
+        e.preventDefault();
+        const photoApdFile = document.getElementById('photoApd').files[0];
+
+        const newDoc = {
+            docNo: "DOC-PPE-" + Math.floor(100 + Math.random() * 900),
+            reqDate: document.getElementById('reqDate').value,
+            name: document.getElementById('reqName').value,
+            nik: document.getElementById('reqNik').value,
+            dept: document.getElementById('reqDept').value,
+            loc: document.getElementById('reqLoc').value,
+            apd: masterPPE.find(p => p.id == document.getElementById('ppeSelect').value).name,
+            qty: document.getElementById('ppeQty').value,
+            status: "Pending Safety",
+            appSafety: "Pending",
+            appPM: "Pending",
+            appDate: "-",
+            handoverDate: "-",
+            apdPhoto: photoApdFile ? URL.createObjectURL(photoApdFile) : "-",
+            handoverPhoto: "-", // Default kosong, menunggu serah terima
+            note: document.getElementById('reqNote').value || "-"
+        };
+        
+        ppeDocumentation.unshift(newDoc);
+        logActivity(`Submit pengajuan APD: ${newDoc.apd} oleh ${newDoc.name}`);
+        alert("Pengajuan APD berhasil dikirim! Menunggu Review Safety Coordinator.");
+        e.target.reset(); 
+        generateReqNo();
+        renderDocTable(); updateDashboardStats();
+    }
+
+    // === APPROVAL SYSTEM & AUTO HANDOVER ===
+    function renderApprovalQueues() {
+        const safetyQueue = document.getElementById('safetyQueue');
+        const pmQueue = document.getElementById('pmQueue');
+        
+        let safetyHtml = '<p class="text-muted text-center">Tidak ada pengajuan menunggu Safety</p>';
+        let pmHtml = '<p class="text-muted text-center">Tidak ada pengajuan menunggu PM</p>';
+
+        const safetyPending = ppeDocumentation.filter(d => d.appSafety === "Pending");
+        const pmPending = ppeDocumentation.filter(d => d.appSafety === "Approved" && d.appPM === "Pending");
+
+        if(safetyPending.length > 0) {
+            safetyHtml = safetyPending.map(d => `
+                <div class="card border-warning mb-2"><div class="card-body p-2">
+                    <h6 class="mb-0 text-dark">${d.name} <small class="text-muted">(${d.nik})</small></h6>
+                    <p class="mb-1"><small><b>${d.apd}</b> - ${d.qty} Pcs</small></p>
+                    <p class="mb-2 text-muted" style="font-size: 0.8rem">${d.note}</p>
+                    <div class="d-flex justify-content-end gap-2">
+                        <button class="btn btn-success btn-sm" onclick="approvePPE('${d.docNo}', 'safety', true)"><i class="bi bi-check-lg"></i> Approve</button>
+                        <button class="btn btn-danger btn-sm" onclick="approvePPE('${d.docNo}', 'safety', false)"><i class="bi bi-x-lg"></i> Reject</button>
+                    </div>
+                </div></div>
+            `).join('');
+        }
+
+        if(pmPending.length > 0) {
+            pmHtml = pmPending.map(d => `
+                <div class="card border-primary mb-2"><div class="card-body p-2">
+                    <h6 class="mb-0 text-dark">${d.name} <small class="text-muted">(${d.nik})</small></h6>
+                    <p class="mb-1"><small><b>${d.apd}</b> - ${d.qty} Pcs</small></p>
+                    <p class="mb-2 text-success" style="font-size: 0.8rem"><i class="bi bi-check-circle-fill"></i> Approved by Safety</p>
+                    <div class="d-flex justify-content-end gap-2">
+                        <button class="btn btn-success btn-sm" onclick="approvePPE('${d.docNo}', 'pm', true)"><i class="bi bi-check-lg"></i> Approve</button>
+                        <button class="btn btn-danger btn-sm" onclick="approvePPE('${d.docNo}', 'pm', false)"><i class="bi bi-x-lg"></i> Reject</button>
+                    </div>
+                </div></div>
+            `).join('');
+        }
+
+        safetyQueue.innerHTML = safetyHtml;
+        pmQueue.innerHTML = pmHtml;
+    }
+
+    function approvePPE(docNo, role, isApproved) {
+        const doc = ppeDocumentation.find(d => d.docNo === docNo);
+        if(!doc) return;
+
+        if(role === 'safety') {
+            doc.appSafety = isApproved ? "Approved" : "Rejected";
+            if(isApproved) { doc.status = "Pending PM"; logActivity(`Safety Coordinator Approved: ${doc.docNo}`); }
+            else { doc.status = "Rejected"; logActivity(`Safety Coordinator Rejected: ${doc.docNo}`); }
+        } else if(role === 'pm') {
+            doc.appPM = isApproved ? "Approved" : "Rejected";
+            if(isApproved) {
+                doc.status = "Siap Serah Terima"; 
+                doc.appDate = new Date().toISOString().slice(0,10);
+                logActivity(`Project Manager Approved: ${doc.docNo}`);
+                renderApprovalQueues(); renderDocTable(); updateDashboardStats(); renderHistoryTable();
+                // Otomatis membuka modal serah terima
+                openHandoverModal(doc.docNo);
+            } else { 
+                doc.status = "Rejected"; logActivity(`Project Manager Rejected: ${doc.docNo}`); 
+            }
+        }
+
+        renderApprovalQueues(); renderDocTable(); updateDashboardStats(); renderHistoryTable();
+    }
+
+    // === HISTORY TABLE WITH HANDOVER BUTTON ===
+    function renderHistoryTable() {
+        const tbody = document.getElementById('historyTableBody');
+        tbody.innerHTML = ppeDocumentation.map(t => {
+            let action = `<button class="btn btn-sm btn-outline-primary"><i class="bi bi-eye"></i></button>`;
+            
+            // Jika status Siap Serah Terima,ampilkan tombol Serah Terima
+            if(t.status === "Siap Serah Terima") {
+                action = `<button class="btn btn-sm btn-success" onclick="openHandoverModal('${t.docNo}')"><i class="bi bi-box-arrow-in-down"></i> Serah Terima</button>`;
+            }
+
+            let badge = 'bg-warning text-dark';
+            if(t.status === 'Completed') badge = 'bg-success';
+            else if(t.status === 'Rejected') badge = 'bg-danger';
+            else if(t.status === 'Pending PM') badge = 'bg-primary';
+            else if(t.status === 'Siap Serah Terima') badge = 'bg-info text-dark';
+
+            return `
+                <tr>
+                    <td class="fw-bold">${t.docNo}</td><td>${t.reqDate}</td><td>${t.name}</td><td>${t.apd}</td>
+                    <td><span class="badge ${badge}">${t.status}</span></td>
+                    <td class="text-end">${action}</td>
+                </tr>
+            `;
+        }).join('');
+    }
+
+    // === HANDOVER MODAL LOGIC ===
+    function openHandoverModal(docNo) {
+        document.getElementById('handoverDocNo').value = docNo;
+        document.getElementById('handoverPhotoInput').value = ''; // Kosongkan input lama
+        new bootstrap.Modal(document.getElementById('handoverModal')).show();
+    }
+
+    function processHandover() {
+        const docNo = document.getElementById('handoverDocNo').value;
+        const photoFile = document.getElementById('handoverPhotoInput').files[0];
+        const doc = ppeDocumentation.find(d => d.docNo === docNo);
+        
+        if(doc && photoFile) {
+            doc.handoverPhoto = URL.createObjectURL(photoFile);
+            doc.handoverDate = new Date().toISOString().slice(0,10);
+            doc.status = "Completed";
+            logActivity(`Proses Serah Terima selesai: ${doc.docNo}`);
+            
+            bootstrap.Modal.getInstance(document.getElementById('handoverModal')).hide();
+            renderDocTable(); updateDashboardStats(); renderHistoryTable();
+            alert("Serah terima berhasil dikonfirmasi!");
+        } else {
+            alert("Harap unggah foto serah terima terlebih dahulu!");
+        }
+    }
+
+    // === MASTER PPE ===
+    function renderPPEFormDropdown() {
+        const select = document.getElementById('ppeSelect');
+        select.innerHTML = '<option value="">-- Pilih APD --</option>';
+        masterPPE.filter(p => p.active).forEach(p => { select.innerHTML += `<option value="${p.id}">${p.name} (${p.cat})</option>`; });
+    }
+    function renderPPEMasterTable() {
+        document.getElementById('ppeMasterTable').innerHTML = masterPPE.map(p => `
+            <tr>
+                <td><img src="${p.photo}" alt="img" width="40" class="rounded"></td>
+                <td class="fw-bold">${p.name}</td><td>${p.cat}</td><td>${p.stock} Pcs</td><td>${p.vendor}</td><td>Rp ${p.price.toLocaleString('id-ID')}</td>
+                <td>${p.active ? '<span class="badge bg-success">Active</span>' : '<span class="badge bg-danger">Inactive</span>'}</td>
+                <td><button class="btn btn-sm btn-outline-primary" onclick="openPPEModal(${p.id})"><i class="bi bi-pencil"></i></button> <button class="btn btn-sm btn-outline-danger" onclick="deletePPE(${p.id})"><i class="bi bi-trash"></i></button></td>
+            </tr>
+        `).join('');
+    }
+    function openPPEModal(id = null) {
+        document.getElementById('ppeId').value = id ? id : '';
+        document.getElementById('ppeModalTitle').innerText = id ? 'Edit PPE' : 'Tambah PPE';
+        document.getElementById('ppeCategory').innerHTML = ppeCategories.map(c => `<option>${c}</option>`).join('');
+        if(id) {
+            const p = masterPPE.find(p => p.id === id);
+            document.getElementById('ppeName').value = p.name; document.getElementById('ppeCategory').value = p.cat;
+            document.getElementById('ppeSizeInput').value = p.size; document.getElementById('ppeStock').value = p.stock;
+            document.getElementById('ppeVendor').value = p.vendor; document.getElementById('ppePrice').value = p.price;
+            document.getElementById('ppePhoto').value = p.photo; document.getElementById('ppeStatus').checked = p.active;
+        } else { document.getElementById('ppeMasterForm').reset(); }
+        new bootstrap.Modal(document.getElementById('ppeModal')).show();
+    }
+    function savePPE() {
+        const id = document.getElementById('ppeId').value;
+        const data = { name: document.getElementById('ppeName').value, cat: document.getElementById('ppeCategory').value, size: document.getElementById('ppeSizeInput').value, stock: parseInt(document.getElementById('ppeStock').value), vendor: document.getElementById('ppeVendor').value, price: parseInt(document.getElementById('ppePrice').value), photo: document.getElementById('ppePhoto').value || "https://via.placeholder.com/50", active: document.getElementById('ppeStatus').checked };
+        if(id) { masterPPE = masterPPE.map(p => p.id == id ? {...p, ...data} : p); logActivity(`Mengubah PPE: ${data.name}`); }
+        else { data.id = Date.now(); masterPPE.push(data); logActivity(`Menambah PPE baru: ${data.name}`); }
+        bootstrap.Modal.getInstance(document.getElementById('ppeModal')).hide();
+        renderPPEMasterTable(); renderPPEFormDropdown();
+    }
+    function deletePPE(id) {
+        if(confirm('Hapus PPE ini?')) { const p = masterPPE.find(p => p.id === id); masterPPE = masterPPE.filter(p => p.id !== id); logActivity(`Menghapus PPE: ${p.name}`); renderPPEMasterTable(); renderPPEFormDropdown(); }
+    }
+    function openCategoryModal() { renderCategoryList(); new bootstrap.Modal(document.getElementById('categoryModal')).show(); }
+    function addCategory() { const name = document.getElementById('newCatName').value; if(name && !ppeCategories.includes(name)) { ppeCategories.push(name); document.getElementById('newCatName').value = ''; renderCategoryList(); } }
+    function renderCategoryList() { document.getElementById('catList').innerHTML = ppeCategories.map(c => `<li class="list-group-item d-flex justify-content-between align-items-center">${c}<button class="btn btn-sm btn-danger" onclick="deleteCategory('${c}')"><i class="bi bi-x"></i></button></li>`).join(''); }
+    function deleteCategory(name) { ppeCategories = ppeCategories.filter(c => c !== name); renderCategoryList(); }
+
+    // === USER MANAGEMENT ===
+    function renderUserTable() {
+        document.getElementById('userTableBody').innerHTML = users.map(u => `
+            <tr><td class="fw-bold">${u.name}</td><td>${u.username}</td><td><span class="badge bg-info text-dark">${u.role}</span></td><td><span class="text-muted fw-bold">********</span></td>
+            <td><button class="btn btn-sm btn-outline-primary" onclick="openUserModal(${u.id})"><i class="bi bi-pencil"></i></button> <button class="btn btn-sm btn-outline-warning" onclick="resetPassword(${u.id})"><i class="bi bi-key"></i></button> <button class="btn btn-sm btn-outline-danger" onclick="deleteUser(${u.id})"><i class="bi bi-trash"></i></button></td></tr>
+        `).join('');
+    }
+    function openUserModal(id = null) {
+        document.getElementById('userId').value = id ? id : ''; document.getElementById('userModalTitle').innerText = id ? 'Edit User' : 'Tambah User';
+        if(id) { const u = users.find(u => u.id === id); document.getElementById('userNameInput').value = u.name; document.getElementById('userUsernameInput').value = u.username; document.getElementById('userRoleInput').value = u.role; }
+        else { document.getElementById('userForm').reset(); }
+        document.getElementById('userPassInput').value = '';
+        new bootstrap.Modal(document.getElementById('userModal')).show();
+    }
+    function saveUser() {
+        const id = document.getElementById('userId').value; const pass = document.getElementById('userPassInput').value;
+        const data = { name: document.getElementById('userNameInput').value, username: document.getElementById('userUsernameInput').value, role: document.getElementById('userRoleInput').value };
+        if(id) { const u = users.find(u => u.id == id); u.name = data.name; u.username = data.username; u.role = data.role; if(pass) u.pass = pass; logActivity(`Mengubah user: ${data.name}`); }
+        else { if(!pass) { alert("Password wajib diisi untuk user baru!"); return; } data.id = Date.now(); data.pass = pass; users.push(data); logActivity(`Menambah user baru: ${data.name}`); }
+        bootstrap.Modal.getInstance(document.getElementById('userModal')).hide(); renderUserTable();
+    }
+    function resetPassword(id) { const u = users.find(u => u.id === id); const newPass = prompt(`Masukkan password baru untuk ${u.name}:`); if(newPass) { u.pass = newPass; logActivity(`Mereset password user: ${u.name}`); alert("Password berhasil direset!"); } }
+    function deleteUser(id) { if(confirm('Hapus user ini?')) { const u = users.find(u => u.id === id); users = users.filter(u => u.id !== id); logActivity(`Menghapus user: ${u.name}`); renderUserTable(); } }
+
+    // === AUDIT TRAIL ===
+    function renderAuditTrail() { document.getElementById('auditTrailBody').innerHTML = auditTrail.map(a => `<tr><td>${a.time}</td><td class="fw-bold">${a.user}</td><td>${a.action}</td></tr>`).join(''); }
+    function renderDashActivity() { const list = auditTrail.slice(0, 5); document.getElementById('dashActivity').innerHTML = list.map(a => `<li class="list-group-item border-0"><i class="bi bi-clock-history text-primary me-2"></i> <small>${a.time}</small> - ${a.action}</li>`).join('') || '<li class="list-group-item border-0 text-muted">Belum ada aktivitas</li>'; }
+
+    // === PPE DOCUMENTATION & EXPORT ===
+    function populateFilterAPD() { const select = document.getElementById('filterAPD'); select.innerHTML = '<option value="">Semua</option>'; masterPPE.forEach(p => select.innerHTML += `<option>${p.name}</option>`); }
+    function applyFilter() { renderDocTable(); }
+    function renderDocTable() {
+        let filtered = [...ppeDocumentation];
+        const fDept = document.getElementById('filterDept').value; const fAPD = document.getElementById('filterAPD').value; const fStatus = document.getElementById('filterStatus').value;
+        if(fDept) filtered = filtered.filter(d => d.dept === fDept);
+        if(fAPD) filtered = filtered.filter(d => d.apd === fAPD);
+        if(fStatus) filtered = filtered.filter(d => d.status === fStatus);
+
+        document.getElementById('docTableBody').innerHTML = filtered.map(d => `
+            <tr class="text-center">
+                <td class="fw-bold">${d.docNo}</td><td>${d.reqDate}</td><td>${d.name}</td><td>${d.nik}</td><td>${d.dept}</td><td>${d.loc}</td>
+                <td>${d.apd}</td><td>${d.qty}</td>
+                <td><span class="badge ${d.status === 'Completed' ? 'bg-success' : d.status === 'Rejected' ? 'bg-danger' : d.status === 'Pending PM' ? 'bg-primary' : d.status === 'Siap Serah Terima' ? 'bg-info text-dark' : 'bg-warning text-dark'}">${d.status}</span></td>
+                <td>${d.appDate}</td><td>${d.handoverDate}</td>
+                <td>${d.apdPhoto !== '-' ? `<img src="${d.apdPhoto}" width="30" class="img-thumbnail">` : '-'}</td>
+                <td>${d.handoverPhoto !== '-' ? `<img src="${d.handoverPhoto}" width="30" class="img-thumbnail">` : '-'}</td>
+                <td>${d.note}</td>
+            </tr>
+        `).join('');
+    }
+
+    function exportData(type) {
+        const rows = document.querySelectorAll('#docTable tbody tr');
+        let data = [];
+        rows.forEach(row => {
+            const cols = row.querySelectorAll('td');
+            data.push({ "No Doc": cols[0].innerText, "Tgl": cols[1].innerText, "Nama": cols[2].innerText, "NIK": cols[3].innerText, "Dept": cols[4].innerText, "Lokasi": cols[5].innerText, "APD": cols[6].innerText, "Jml": cols[7].innerText, "Status": cols[8].innerText, "Tgl Approve": cols[9].innerText, "Tgl Serah Terima": cols[10].innerText, "Catatan": cols[13].innerText });
+        });
+        if(type === 'excel') {
+            const ws = XLSX.utils.json_to_sheet(data); const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, "Dokumentasi APD"); XLSX.writeFile(wb, "Dokumentasi_APD_LMI.xlsx");
+        } else if(type === 'csv') {
+            const ws = XLSX.utils.json_to_sheet(data); const csv = XLSX.utils.sheet_to_csv(ws); const blob = new Blob([csv], {type: "text/csv;charset=utf-8;"}); const link = document.createElement("a"); link.href = URL.createObjectURL(blob); link.download = "Dokumentasi_APD_LMI.csv"; link.click();
+        } else if(type === 'pdf') {
+            const { jsPDF } = window.jspdf; const doc = new jsPDF('l', 'mm', 'a4');
+            doc.autoTable({ head: [["No Doc", "Tgl", "Nama", "NIK", "Dept", "APD", "Jml", "Status", "Tgl Approve", "Tgl Serah Terima"]], body: data.map(d => [d["No Doc"], d["Tgl"], d["Nama"], d["NIK"], d["Dept"], d["APD"], d["Jml"], d["Status"], d["Tgl Approve"], d["Tgl Serah Terima"]]), styles: { fontSize: 8, cellPadding: 2 }, headStyles: { fillColor: [0, 91, 170] } });
+            doc.save("Dokumentasi_APD_LMI.pdf");
+        }
+        logActivity(`Export data dokumentasi APD ke ${type.toUpperCase()}`);
+    }
+
+    // === DOC EXPLORER ===
+    function renderExplorer() {
+        const grid = document.getElementById('explorerGrid');
+        const searchTerm = document.getElementById('docSearchInput').value.toLowerCase();
+        grid.innerHTML = '';
+        const isAdmin = currentUser && currentUser.role === 'Administrator';
+
+        let folders = fileSystem.folders.filter(f => f.parent === currentFolder);
+        if(searchTerm) folders = folders.filter(f => f.name.toLowerCase().includes(searchTerm));
+        folders.forEach(f => {
+            let actions = isAdmin ? `<button class="btn btn-sm btn-light" onclick="openDocModal('folder', '${f.id}')"><i class="bi bi-three-dots"></i></button>` : '';
+            grid.innerHTML += `<div class="col-md-2 col-sm-4 mb-3 drive-item" ondblclick="openFolder('${f.id}')">
+                <div class="card h-100"><div class="card-body">
+                    <i class="bi bi-folder-fill" style="font-size: 3.5rem; color: var(--lmg-yellow);"></i>
+                    <h6 class="mt-2 mb-0 text-truncate">${f.name}</h6>
+                </div>
+                <div class="card-footer p-1 bg-light text-center border-0">
+                    <button class="btn btn-sm btn-light" onclick="openFolder('${f.id}')"><i class="bi bi-folder2-open"></i></button>
+                    ${actions}
+                </div></div>
+            </div>`;
+        });
+
+        let files = fileSystem.files.filter(f => f.parent === currentFolder);
+        if(searchTerm) files = files.filter(f => f.name.toLowerCase().includes(searchTerm));
+        files.forEach(f => {
+            let icon = "bi-file-earmark", color = "var(--lmg-blue)";
+            if(f.type === 'pdf') { icon = "bi-file-earmark-pdf"; color = "red"; } else if(f.type.includes('doc')) { icon = "bi-file-earmark-word"; color = "#2b579a"; }
+            let actions = isAdmin ? `<button class="btn btn-sm btn-light" onclick="openDocModal('file', '${f.id}')"><i class="bi bi-three-dots"></i></button>` : '';
+            grid.innerHTML += `<div class="col-md-2 col-sm-4 mb-3 drive-item" ondblclick="previewFile('${f.id}')">
+                <div class="card h-100"><div class="card-body">
+                    <i class="bi ${icon}" style="font-size: 3.5rem; color: ${color};"></i>
+                    <h6 class="mt-2 mb-0 text-truncate" style="font-size: 0.85rem">${f.name}</h6>
+                    <small class="text-muted">${f.size}</small>
+                </div>
+                <div class="card-footer p-1 bg-light text-center border-0">
+                    <button class="btn btn-sm btn-light" onclick="previewFile('${f.id}')"><i class="bi bi-eye"></i></button>
+                    ${actions}
+                </div></div>
+            </div>`;
+        });
+        renderBreadcrumb();
+    }
+
+    function renderBreadcrumb() {
+        const bc = document.getElementById('breadcrumbNav'); let path = []; let curr = currentFolder;
+        while(curr !== "root") { let folder = fileSystem.folders.find(f => f.id === curr); path.unshift({id: folder.id, name: folder.name}); curr = folder.parent; }
+        let html = `<li class="breadcrumb-item"><a href="#" onclick="navigateTo(-1)"><i class="bi bi-house-door"></i> Home</a></li>`;
+        path.forEach((p, idx) => { html += `<li class="breadcrumb-item"><a href="#" onclick="navigateTo(${idx})">${p.name}</a></li>`; });
+        bc.innerHTML = html;
+    }
+    function openFolder(id) { currentFolder = id; renderExplorer(); }
+    function navigateTo(idx) {
+        if(idx === -1) { currentFolder = "root"; } else { let path = []; let curr = currentFolder; while(curr !== "root") { let folder = fileSystem.folders.find(f => f.id === curr); path.unshift(folder); curr = folder.parent; } currentFolder = path[idx].id; }
+        renderExplorer();
+    }
+    function createFolder() { const name = prompt("Masukkan nama folder baru:"); if(name) { fileSystem.folders.push({id: "f" + Date.now(), name: name, parent: currentFolder}); logActivity(`Membuat folder: ${name}`); renderExplorer(); } }
+    function handleFileUpload(files) {
+        Array.from(files).forEach(file => { let type = file.name.split('.').pop(); fileSystem.files.push({id: "d" + Date.now(), name: file.name, type: type, parent: currentFolder, size: (file.size / 1024 / 1024).toFixed(2) + " MB"}); });
+        logActivity(`Upload ${files.length} file dokumen`); renderExplorer();
+    }
+    const dropZone = document.getElementById('dropZone');
     dropZone.addEventListener('dragover', (e) => { e.preventDefault(); dropZone.classList.add('dragover'); });
     dropZone.addEventListener('dragleave', () => dropZone.classList.remove('dragover'));
-    dropZone.addEventListener('drop', (e) => {
-        e.preventDefault();
-        dropZone.classList.remove('dragover');
-        handleFiles(e.dataTransfer.files);
-    });
-    fileInput.addEventListener('change', (e) => handleFiles(e.target.files));
-
-    function handleFiles(files) {
-        fileList.innerHTML = '';
-        if(files.length === 0) {
-            fileList.innerHTML = '<li class="list-group-item text-muted text-center border-0">Belum ada file dipilih</li>';
-            return;
+    dropZone.addEventListener('drop', (e) => { e.preventDefault(); dropZone.classList.remove('dragover'); handleFileUpload(e.dataTransfer.files); });
+    
+    function previewFile(id) {
+        const f = fileSystem.files.find(f => f.id === id);
+        document.getElementById('docModalTitle').innerText = f.name;
+        document.getElementById('docModalBody').innerHTML = `<div class="text-center mb-3"><i class="bi bi-file-earmark-pdf" style="font-size: 5rem; color: red;"></i></div><p><strong>Ukuran:</strong> ${f.size}</p><div class="alert alert-info">Preview Google Drive simulasi.</div><a href="#" class="btn btn-lmg w-100"><i class="bi bi-download"></i> Download</a>`;
+        new bootstrap.Modal(document.getElementById('docModal')).show();
+    }
+    function openDocModal(type, id) {
+        let data = type === 'folder' ? fileSystem.folders.find(f => f.id === id) : fileSystem.files.find(f => f.id === id);
+        document.getElementById('docModalTitle').innerText = data.name;
+        document.getElementById('docModalBody').innerHTML = `<div class="list-group"><button class="list-group-item list-group-item-action" onclick="renameItem('${type}', '${id}')"><i class="bi bi-pencil me-2"></i> Rename</button><button class="list-group-item list-group-item-action text-danger" onclick="deleteItem('${type}', '${id}')"><i class="bi bi-trash me-2"></i> Delete</button></div>`;
+        new bootstrap.Modal(document.getElementById('docModal')).show();
+    }
+    function renameItem(type, id) {
+        let data = type === 'folder' ? fileSystem.folders.find(f => f.id === id) : fileSystem.files.find(f => f.id === id);
+        const newName = prompt("Masukkan nama baru:", data.name);
+        if(newName) { data.name = newName; logActivity(`Mengubah nama ${type} menjadi: ${newName}`); bootstrap.Modal.getInstance(document.getElementById('docModal')).hide(); renderExplorer(); }
+    }
+    function deleteItem(type, id) {
+        if(confirm('Hapus item ini?')) {
+            if(type === 'folder') { fileSystem.folders = fileSystem.folders.filter(f => f.id !== id); fileSystem.files = fileSystem.files.filter(f => f.parent !== id); } else { fileSystem.files = fileSystem.files.filter(f => f.id !== id); }
+            logActivity(`Menghapus ${type}`); bootstrap.Modal.getInstance(document.getElementById('docModal')).hide(); renderExplorer();
         }
-        Array.from(files).forEach(file => {
-            if(file.size > 20 * 1024 * 1024) {
-                alert(`${file.name} melebihi 20MB dan tidak dapat diunggah.`);
-                return;
-            }
-            const li = document.createElement('li');
-            li.className = 'list-group-item d-flex justify-content-between align-items-center';
-            li.innerHTML = `<span><i class="bi bi-file-earmark text-primary me-2"></i> ${file.name}</span> <span class="badge bg-primary rounded-pill">${(file.size/1024/1024).toFixed(2)} MB</span>`;
-            fileList.appendChild(li);
-        });
     }
 </script>
 </body>
