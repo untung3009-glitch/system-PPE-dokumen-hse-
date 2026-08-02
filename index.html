@@ -26,13 +26,13 @@
         .btn-lmg { background-color: var(--lmg-blue); color: #ffffff; font-weight: bold; transition: 0.3s; }
         .btn-lmg:hover { background-color: var(--lmg-dark-blue); color: var(--lmg-yellow); }
         
-        .login-wrapper { height: 100vh; display: flex; align-items: center; justify-content: center; background: linear-gradient(135deg, #ffffff 0%, #cce7ff 100%); }
-        .login-card { width: 420px; border: none; border-radius: 15px; box-shadow: 0 10px 30px rgba(0, 91, 170, 0.15); overflow: hidden; }
+        .login-wrapper { height: 100vh; display: flex; align-items: center; justify-content: center; background: linear-gradient(135deg, #ffffff 0%, #cce7ff 100%); padding: 15px; }
+        .login-card { width: 100%; max-width: 420px; border: none; border-radius: 15px; box-shadow: 0 10px 30px rgba(0, 91, 170, 0.15); overflow: hidden; }
         .login-logo { background: #ffffff; padding: 25px; text-align: center; border-bottom: 1px solid #eee; }
         .login-logo img { max-height: 60px; width: auto; }
         
         .wrapper { display: flex; min-height: 100vh; }
-        .sidebar { width: 260px; background-color: #ffffff; color: var(--lmg-dark-blue); transition: all 0.3s; border-right: 1px solid #e0e0e0; box-shadow: 2px 0 10px rgba(0,0,0,0.05); position: fixed; height: 100vh; overflow-y: auto; z-index: 1000; }
+        .sidebar { width: 260px; background-color: #ffffff; color: var(--lmg-dark-blue); transition: all 0.3s; border-right: 1px solid #e0e0e0; box-shadow: 2px 0 10px rgba(0,0,0,0.05); position: fixed; height: 100vh; overflow-y: auto; z-index: 1100; }
         .sidebar.hidden { margin-left: -260px; }
         .sidebar-header { padding: 15px; background: #ffffff; text-align: center; border-bottom: 4px solid var(--lmg-yellow); }
         .sidebar-header img { max-height: 40px; width: auto; }
@@ -42,7 +42,7 @@
         .sidebar-menu a:hover, .sidebar-menu a.active { background-color: var(--lmg-light-blue); color: var(--lmg-blue); border-left: 4px solid var(--lmg-blue); font-weight: bold; }
         .sidebar-menu a i { margin-right: 10px; font-size: 1.2rem; }
         
-        .content { flex: 1; margin-left: 260px; transition: margin 0.3s; }
+        .content { flex: 1; margin-left: 260px; transition: margin 0.3s; width: 100%; }
         .content.full { margin-left: 0; }
         .navbar-top { background-color: white; padding: 15px 25px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 10px rgba(0,0,0,0.05); position: sticky; top: 0; z-index: 999; }
         
@@ -58,6 +58,23 @@
         .drop-zone { border: 2px dashed var(--lmg-blue); padding: 40px; text-align: center; border-radius: 10px; background: #f8fbff; cursor: pointer; transition: 0.3s; }
         .drop-zone:hover, .drop-zone.dragover { border-color: var(--lmg-yellow); background: #fffdf0; }
         .table thead th { background-color: var(--lmg-dark-blue); color: white; }
+
+        /* === RESPONSIVE MOBILE STYLES === */
+        .sidebar-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1050; }
+        .sidebar-overlay.active { display: block; }
+        
+        @media (max-width: 768px) {
+            .sidebar { margin-left: -260px; z-index: 1100; }
+            .sidebar.active { margin-left: 0; }
+            .content { margin-left: 0; }
+            .content.full { margin-left: 0; }
+            .navbar-top { padding: 15px; }
+            .hide-mobile { display: none !important; }
+            .card-stat .card-body { padding: 15px; }
+            .card-stat h3 { font-size: 1.5rem; }
+            .card-stat i { font-size: 2rem !important; }
+            .page-content { padding: 0; }
+        }
     </style>
 </head>
 <body>
@@ -99,6 +116,9 @@
 
 <!-- MAIN APP VIEW -->
 <div id="appView" class="wrapper" style="display: none;">
+    <!-- Overlay untuk mobile saat sidebar dibuka -->
+    <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+
     <nav class="sidebar" id="sidebar">
         <div class="sidebar-header">
             <img src="https://z-cdn-media.chatglm.cn/files/342ceaed-a660-458e-b047-e67a5cbb28e5.png?auth_key=1885598233-b68f40e8beec4c8583a02cb62d86b7d5-0-a1c6bcf6e07beb253537467835f04c6f" alt="LiuGong Logo">
@@ -126,7 +146,7 @@
         <div class="navbar-top">
             <button class="btn btn-light border" onclick="toggleSidebar()"><i class="bi bi-list"></i></button>
             <div class="d-flex align-items-center">
-                <span class="text-muted me-3" id="sessionTimer" style="font-size: 0.8rem;"></span>
+                <span class="text-muted me-3 hide-mobile" id="sessionTimer" style="font-size: 0.8rem;"></span>
                 <button class="btn btn-light border position-relative me-3">
                     <i class="bi bi-bell"></i>
                     <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">3</span>
@@ -148,19 +168,19 @@
             
             <!-- DASHBOARD -->
             <div id="page-dashboard" class="page-content">
-                <div class="d-flex justify-content-between align-items-center mb-4">
+                <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 gap-2">
                     <h2 class="mb-0 text-lmg fw-bold">Dashboard</h2>
-                    <button class="btn btn-warning btn-sm admin-only" style="display: none;" onclick="openEditDashboardModal()"><i class="bi bi-pencil-square"></i> Edit Dashboard</button>
+                    <button class="btn btn-warning btn-sm admin-only align-self-start" style="display: none;" onclick="openEditDashboardModal()"><i class="bi bi-pencil-square"></i> Edit Dashboard</button>
                 </div>
                 <div class="row g-4">
-                    <div class="col-md-3"><div class="card card-stat shadow-sm h-100"><div class="card-body d-flex justify-content-between align-items-center"><div><h6 class="text-muted mb-1">Total Pengajuan APD</h6><h3 class="mb-0 fw-bold" id="dashTotal">0</h3></div><i class="bi bi-file-text fs-1" style="color: var(--lmg-blue)"></i></div></div></div>
-                    <div class="col-md-3"><div class="card card-stat shadow-sm h-100"><div class="card-body d-flex justify-content-between align-items-center"><div><h6 class="text-muted mb-1">Pending Approval</h6><h3 class="mb-0 fw-bold" id="dashPending">0</h3></div><i class="bi bi-hourglass-split fs-1" style="color: var(--lmg-yellow)"></i></div></div></div>
-                    <div class="col-md-3"><div class="card card-stat shadow-sm h-100"><div class="card-body d-flex justify-content-between align-items-center"><div><h6 class="text-muted mb-1">Total Dokumen</h6><h3 class="mb-0 fw-bold" id="dashDocs">450</h3></div><i class="bi bi-folder fs-1" style="color: var(--lmg-blue)"></i></div></div></div>
-                    <div class="col-md-3"><div class="card card-stat shadow-sm h-100"><div class="card-body d-flex justify-content-between align-items-center"><div><h6 class="text-muted mb-1">Stock APD Available</h6><h3 class="mb-0 fw-bold" id="dashStock">320</h3></div><i class="bi bi-boxes fs-1" style="color: var(--lmg-yellow)"></i></div></div></div>
+                    <div class="col-md-6 col-lg-3"><div class="card card-stat shadow-sm h-100"><div class="card-body d-flex justify-content-between align-items-center"><div><h6 class="text-muted mb-1">Total Pengajuan APD</h6><h3 class="mb-0 fw-bold" id="dashTotal">0</h3></div><i class="bi bi-file-text fs-1" style="color: var(--lmg-blue)"></i></div></div></div>
+                    <div class="col-md-6 col-lg-3"><div class="card card-stat shadow-sm h-100"><div class="card-body d-flex justify-content-between align-items-center"><div><h6 class="text-muted mb-1">Pending Approval</h6><h3 class="mb-0 fw-bold" id="dashPending">0</h3></div><i class="bi bi-hourglass-split fs-1" style="color: var(--lmg-yellow)"></i></div></div></div>
+                    <div class="col-md-6 col-lg-3"><div class="card card-stat shadow-sm h-100"><div class="card-body d-flex justify-content-between align-items-center"><div><h6 class="text-muted mb-1">Total Dokumen</h6><h3 class="mb-0 fw-bold" id="dashDocs">450</h3></div><i class="bi bi-folder fs-1" style="color: var(--lmg-blue)"></i></div></div></div>
+                    <div class="col-md-6 col-lg-3"><div class="card card-stat shadow-sm h-100"><div class="card-body d-flex justify-content-between align-items-center"><div><h6 class="text-muted mb-1">Stock APD Available</h6><h3 class="mb-0 fw-bold" id="dashStock">320</h3></div><i class="bi bi-boxes fs-1" style="color: var(--lmg-yellow)"></i></div></div></div>
                 </div>
-                <div class="row mt-4">
-                    <div class="col-md-8"><div class="card shadow-sm"><div class="card-header"><h5 class="mb-0">Grafik Pengajuan APD Bulanan</h5></div><div class="card-body"><canvas id="ppeChart" height="100"></canvas></div></div></div>
-                    <div class="col-md-4"><div class="card shadow-sm"><div class="card-header"><h5 class="mb-0">Aktivitas Terbaru</h5></div><div class="card-body"><ul class="list-group list-group-flush" id="dashActivity"><li class="list-group-item border-0 text-muted">Memuat aktivitas...</li></ul></div></div></div>
+                <div class="row mt-4 g-4">
+                    <div class="col-lg-8"><div class="card shadow-sm h-100"><div class="card-header"><h5 class="mb-0">Grafik Pengajuan APD Bulanan</h5></div><div class="card-body"><canvas id="ppeChart" height="100"></canvas></div></div></div>
+                    <div class="col-lg-4"><div class="card shadow-sm h-100"><div class="card-header"><h5 class="mb-0">Aktivitas Terbaru</h5></div><div class="card-body"><ul class="list-group list-group-flush" id="dashActivity"><li class="list-group-item border-0 text-muted">Memuat aktivitas...</li></ul></div></div></div>
                 </div>
             </div>
 
@@ -171,28 +191,36 @@
                     <form id="ppeForm" onsubmit="submitPPEForm(event)">
                         <h5 class="text-lmg mb-3 border-bottom pb-2">Data Pemohon</h5>
                         <div class="row mb-3">
-                            <div class="col-md-6"><label class="form-label text-muted">Nomor Pengajuan (Auto)</label><input type="text" class="form-control" id="reqNo" readonly></div>
+                            <div class="col-md-6 mb-3 mb-md-0"><label class="form-label text-muted">Nomor Pengajuan (Auto)</label><input type="text" class="form-control" id="reqNo" readonly></div>
                             <div class="col-md-6"><label class="form-label text-muted">Tanggal</label><input type="date" class="form-control" id="reqDate" required></div>
                         </div>
                         <div class="row mb-3">
-                            <div class="col-md-6"><label class="form-label text-muted">Nama Pemohon</label><input type="text" class="form-control" id="reqName" required placeholder="Nama Lengkap"></div>
+                            <div class="col-md-6 mb-3 mb-md-0"><label class="form-label text-muted">Nama Pemohon</label><input type="text" class="form-control" id="reqName" required placeholder="Nama Lengkap"></div>
                             <div class="col-md-6"><label class="form-label text-muted">NIK</label><input type="text" class="form-control" id="reqNik" required placeholder="Nomor Induk Karyawan"></div>
                         </div>
                         <div class="row mb-3">
-                            <div class="col-md-6"><label class="form-label text-muted">Departemen</label><select class="form-select" id="reqDept" required><option value="">Pilih...</option><option>Maintenance</option><option>Production</option><option>Engineering</option><option>HRGA</option></select></div>
+                            <div class="col-md-6 mb-3 mb-md-0">
+                                <label class="form-label text-muted">Departemen</label>
+                                <select class="form-select" id="reqDept" required>
+                                    <option value="">Pilih...</option>
+                                    <option>Full Maintenance service</option>
+                                    <option>Service Contract</option>
+                                    <option>HSE</option>
+                                </select>
+                            </div>
                             <div class="col-md-6"><label class="form-label text-muted">Lokasi Kerja</label><input type="text" class="form-control" id="reqLoc" required placeholder="Contoh: Workshop B"></div>
                         </div>
 
                         <h5 class="text-lmg mb-3 mt-4 border-bottom pb-2">Informasi Permintaan</h5>
                         <div class="row mb-3">
-                            <div class="col-md-4"><label class="form-label text-muted">Jenis APD</label><select class="form-select" id="ppeSelect" required></select></div>
-                            <div class="col-md-4"><label class="form-label text-muted">Ukuran</label><input type="text" class="form-control" id="ppeSize" placeholder="Tulis manual" required></div>
+                            <div class="col-md-4 mb-3 mb-md-0"><label class="form-label text-muted">Jenis APD</label><select class="form-select" id="ppeSelect" required></select></div>
+                            <div class="col-md-4 mb-3 mb-md-0"><label class="form-label text-muted">Ukuran</label><input type="text" class="form-control" id="ppeSize" placeholder="Tulis manual" required></div>
                             <div class="col-md-4"><label class="form-label text-muted">Jumlah</label><input type="number" class="form-control" id="ppeQty" placeholder="0" required></div>
                         </div>
 
                         <h5 class="text-lmg mb-3 mt-4 border-bottom pb-2">Dokumentasi APD</h5>
                         <div class="row mb-3">
-                            <div class="col-md-6">
+                            <div class="col-md-6 mb-3 mb-md-0">
                                 <label class="form-label text-muted">Upload Foto APD</label>
                                 <input type="file" class="form-control" id="photoApd" accept="image/*" required>
                             </div>
@@ -215,10 +243,12 @@
             <div id="page-ppe_history" class="page-content" style="display:none;">
                 <h2 class="mb-4 text-lmg fw-bold">Riwayat Pengajuan APD</h2>
                 <div class="card shadow-sm"><div class="card-body">
-                    <table class="table table-hover align-middle">
-                        <thead><tr><th>No. Dokumentasi</th><th>Tanggal</th><th>Nama</th><th>APD</th><th>Status</th><th class="text-end">Aksi</th></tr></thead>
-                        <tbody id="historyTableBody"></tbody>
-                    </table>
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle">
+                            <thead><tr><th>No. Dokumentasi</th><th>Tanggal</th><th>Nama</th><th>APD</th><th>Status</th><th class="text-end">Aksi</th></tr></thead>
+                            <tbody id="historyTableBody"></tbody>
+                        </table>
+                    </div>
                 </div></div>
             </div>
 
@@ -226,13 +256,13 @@
             <div id="page-ppe_approval" class="page-content" style="display:none;">
                 <h2 class="mb-4 text-lmg fw-bold">Approval APD (Multi-Level)</h2>
                 <div class="row g-4">
-                    <div class="col-md-6">
+                    <div class="col-lg-6">
                         <div class="card shadow-sm h-100">
                             <div class="card-header bg-warning text-dark"><h5 class="mb-0"><i class="bi bi-shield-exclamation"></i> Review Safety Coordinator</h5></div>
                             <div class="card-body"><div id="safetyQueue"></div></div>
                         </div>
                     </div>
-                    <div class="col-md-6">
+                    <div class="col-lg-6">
                         <div class="card shadow-sm h-100">
                             <div class="card-header bg-primary text-white"><h5 class="mb-0"><i class="bi bi-person-badge"></i> Approval Project Manager</h5></div>
                             <div class="card-body"><div id="pmQueue"></div></div>
@@ -243,11 +273,11 @@
 
             <!-- PPE DOCUMENTATION & REPORT -->
             <div id="page-ppe_documentation" class="page-content" style="display:none;">
-                <div class="d-flex justify-content-between align-items-center mb-4">
+                <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 gap-3">
                     <h2 class="mb-0 text-lmg fw-bold">Laporan Dokumentasi APD</h2>
-                    <div class="dropdown">
-                        <button class="btn btn-success btn-lg dropdown-toggle" data-bs-toggle="dropdown"><i class="bi bi-cloud-download"></i> Download Laporan</button>
-                        <ul class="dropdown-menu dropdown-menu-end">
+                    <div class="dropdown align-self-start align-self-md-end">
+                        <button class="btn btn-success dropdown-toggle w-100" data-bs-toggle="dropdown"><i class="bi bi-cloud-download"></i> Download Laporan</button>
+                        <ul class="dropdown-menu dropdown-menu-end w-100">
                             <li><h6 class="dropdown-header">Format Data Tabel</h6></li>
                             <li><a class="dropdown-item" href="#" onclick="exportData('excel')"><i class="bi bi-file-earmark-excel text-success"></i> Excel (.xlsx)</a></li>
                             <li><a class="dropdown-item" href="#" onclick="exportData('csv')"><i class="bi bi-file-earmark-spreadsheet text-success"></i> CSV</a></li>
@@ -266,7 +296,15 @@
                         <div class="row g-2 align-items-end">
                             <div class="col-md-2"><label class="form-label text-muted small">Dari Tanggal</label><input type="date" class="form-control form-control-sm" id="filterStart"></div>
                             <div class="col-md-2"><label class="form-label text-muted small">Sampai Tanggal</label><input type="date" class="form-control form-control-sm" id="filterEnd"></div>
-                            <div class="col-md-2"><label class="form-label text-muted small">Departemen</label><select class="form-select form-select-sm" id="filterDept"><option value="">Semua</option><option>Maintenance</option><option>Production</option><option>Engineering</option></select></div>
+                            <div class="col-md-2">
+                                <label class="form-label text-muted small">Departemen</label>
+                                <select class="form-select form-select-sm" id="filterDept">
+                                    <option value="">Semua</option>
+                                    <option>Full Maintenance service</option>
+                                    <option>Service Contract</option>
+                                    <option>HSE</option>
+                                </select>
+                            </div>
                             <div class="col-md-2"><label class="form-label text-muted small">Jenis APD</label><select class="form-select form-select-sm" id="filterAPD"><option value="">Semua</option></select></div>
                             <div class="col-md-2"><label class="form-label text-muted small">Status</label><select class="form-select form-select-sm" id="filterStatus"><option value="">Semua</option><option>Pending Safety</option><option>Pending PM</option><option>Siap Serah Terima</option><option>Completed</option><option>Rejected</option></select></div>
                             <div class="col-md-2"><button class="btn btn-primary btn-sm w-100" onclick="applyFilter()"><i class="bi bi-funnel"></i> Filter</button></div>
@@ -276,45 +314,54 @@
 
                 <div class="card shadow-sm">
                     <div class="card-body">
-                        <table class="table table-bordered align-middle table-sm" id="docTable">
-                            <thead class="table-light text-center">
-                                <tr>
-                                    <th>No Doc</th><th>Tgl Pengajuan</th><th>Nama</th><th>NIK</th><th>Dept</th><th>Lokasi</th>
-                                    <th>Jenis APD</th><th>Jumlah</th><th>Status</th><th>Tgl Approve</th><th>Tgl Serah Terima</th>
-                                    <th>Foto APD</th><th>Foto Serah Terima</th><th>Catatan</th>
-                                </tr>
-                            </thead>
-                            <tbody id="docTableBody"></tbody>
-                        </table>
+                        <div class="table-responsive">
+                            <table class="table table-bordered align-middle table-sm" id="docTable">
+                                <thead class="table-light text-center">
+                                    <tr>
+                                        <th>No Doc</th><th>Tgl Pengajuan</th><th>Nama</th><th>NIK</th><th>Dept</th><th>Lokasi</th>
+                                        <th>Jenis APD</th><th>Jumlah</th><th>Status</th><th>Tgl Approve</th><th>Tgl Serah Terima</th>
+                                        <th>Foto APD</th><th>Foto Serah Terima</th><th>Catatan</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="docTableBody"></tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
             </div>
 
             <!-- MASTER PPE -->
             <div id="page-master_ppe" class="page-content" style="display:none;">
-                <div class="d-flex justify-content-between align-items-center mb-4">
+                <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 gap-3">
                     <h2 class="mb-0 text-lmg fw-bold">Master PPE Management</h2>
-                    <div><button class="btn btn-warning text-dark" onclick="openCategoryModal()"><i class="bi bi-tags"></i> Kategori</button><button class="btn btn-lmg ms-2" onclick="openPPEModal()"><i class="bi bi-plus-lg"></i> Tambah PPE</button></div>
+                    <div class="d-flex gap-2">
+                        <button class="btn btn-warning text-dark flex-grow-1" onclick="openCategoryModal()"><i class="bi bi-tags"></i> Kategori</button>
+                        <button class="btn btn-lmg flex-grow-1" onclick="openPPEModal()"><i class="bi bi-plus-lg"></i> Tambah PPE</button>
+                    </div>
                 </div>
                 <div class="card shadow-sm"><div class="card-body">
-                    <table class="table table-hover align-middle">
-                        <thead><tr><th>Foto</th><th>Nama APD</th><th>Kategori</th><th>Stock</th><th>Vendor</th><th>Harga</th><th>Status</th><th>Aksi</th></tr></thead>
-                        <tbody id="ppeMasterTable"></tbody>
-                    </table>
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle">
+                            <thead><tr><th>Foto</th><th>Nama APD</th><th>Kategori</th><th>Stock</th><th>Vendor</th><th>Harga</th><th>Status</th><th>Aksi</th></tr></thead>
+                            <tbody id="ppeMasterTable"></tbody>
+                        </table>
+                    </div>
                 </div></div>
             </div>
 
             <!-- USER MANAGEMENT -->
             <div id="page-user_management" class="page-content" style="display:none;">
-                <div class="d-flex justify-content-between align-items-center mb-4">
+                <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 gap-3">
                     <h2 class="mb-0 text-lmg fw-bold">Manajemen Pengguna</h2>
-                    <button class="btn btn-lmg" onclick="openUserModal()"><i class="bi bi-person-plus"></i> Tambah User</button>
+                    <button class="btn btn-lmg align-self-start" onclick="openUserModal()"><i class="bi bi-person-plus"></i> Tambah User</button>
                 </div>
                 <div class="card shadow-sm"><div class="card-body">
-                    <table class="table table-hover align-middle">
-                        <thead><tr><th>Nama</th><th>Username</th><th>Role</th><th>Password</th><th>Aksi</th></tr></thead>
-                        <tbody id="userTableBody"></tbody>
-                    </table>
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle">
+                            <thead><tr><th>Nama</th><th>Username</th><th>Role</th><th>Password</th><th>Aksi</th></tr></thead>
+                            <tbody id="userTableBody"></tbody>
+                        </table>
+                    </div>
                 </div></div>
             </div>
 
@@ -322,20 +369,22 @@
             <div id="page-audit_trail" class="page-content" style="display:none;">
                 <h2 class="mb-4 text-lmg fw-bold">Audit Trail (Riwayat Aktivitas)</h2>
                 <div class="card shadow-sm"><div class="card-body">
-                    <table class="table table-sm table-hover">
-                        <thead><tr><th>Waktu</th><th>User</th><th>Aktivitas</th></tr></thead>
-                        <tbody id="auditTrailBody"></tbody>
-                    </table>
+                    <div class="table-responsive">
+                        <table class="table table-sm table-hover">
+                            <thead><tr><th>Waktu</th><th>User</th><th>Aktivitas</th></tr></thead>
+                            <tbody id="auditTrailBody"></tbody>
+                        </table>
+                    </div>
                 </div></div>
             </div>
 
             <!-- DOCUMENT EXPLORER -->
             <div id="page-doc_explorer" class="page-content" style="display:none;">
-                 <div class="d-flex justify-content-between align-items-center mb-3">
+                 <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-3 gap-3">
                     <h2 class="mb-0 text-lmg fw-bold">Document Storage</h2>
-                    <div class="d-flex">
-                        <input type="text" class="form-control me-2" placeholder="Cari file atau folder..." id="docSearchInput" oninput="renderExplorer()">
-                        <button class="btn btn-warning text-dark me-2 admin-only" style="display: none;" onclick="createFolder()"><i class="bi bi-folder-plus"></i> Folder</button>
+                    <div class="d-flex flex-wrap gap-2">
+                        <input type="text" class="form-control" placeholder="Cari file atau folder..." id="docSearchInput" oninput="renderExplorer()">
+                        <button class="btn btn-warning text-dark admin-only" style="display: none;" onclick="createFolder()"><i class="bi bi-folder-plus"></i> Folder</button>
                         <button class="btn btn-lmg admin-only" style="display: none;" onclick="document.getElementById('fileInputHidden').click()"><i class="bi bi-cloud-upload"></i> Upload</button>
                         <input type="file" id="fileInputHidden" style="display:none;" multiple onchange="handleFileUpload(this.files)">
                     </div>
@@ -355,7 +404,7 @@
 </div>
 
 <!-- MODALS -->
-<div class="modal fade" id="ppeModal" tabindex="-1"><div class="modal-dialog"><div class="modal-content">
+<div class="modal fade" id="ppeModal" tabindex="-1"><div class="modal-dialog modal-dialog-centered"><div class="modal-content">
     <div class="modal-header text-white" style="background-color: var(--lmg-blue);"><h5 class="modal-title" id="ppeModalTitle">Tambah PPE</h5><button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button></div>
     <div class="modal-body">
         <form id="ppeMasterForm">
@@ -371,12 +420,12 @@
     <div class="modal-footer"><button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button><button type="button" class="btn btn-lmg" onclick="savePPE()">Simpan</button></div>
 </div></div></div>
 
-<div class="modal fade" id="categoryModal" tabindex="-1"><div class="modal-dialog"><div class="modal-content">
+<div class="modal fade" id="categoryModal" tabindex="-1"><div class="modal-dialog modal-dialog-centered"><div class="modal-content">
     <div class="modal-header bg-warning text-dark"><h5 class="modal-title">Kelola Kategori PPE</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
     <div class="modal-body"><div class="input-group mb-3"><input type="text" class="form-control" id="newCatName" placeholder="Nama kategori baru"><button class="btn btn-lmg" onclick="addCategory()">Tambah</button></div><ul class="list-group" id="catList"></ul></div>
 </div></div></div>
 
-<div class="modal fade" id="userModal" tabindex="-1"><div class="modal-dialog"><div class="modal-content">
+<div class="modal fade" id="userModal" tabindex="-1"><div class="modal-dialog modal-dialog-centered"><div class="modal-content">
     <div class="modal-header text-white" style="background-color: var(--lmg-blue);"><h5 class="modal-title" id="userModalTitle">Tambah User</h5><button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button></div>
     <div class="modal-body">
         <form id="userForm">
@@ -391,7 +440,7 @@
 </div></div></div>
 
 <!-- MODAL: EDIT DASHBOARD (Admin Only) -->
-<div class="modal fade" id="editDashboardModal" tabindex="-1"><div class="modal-dialog"><div class="modal-content">
+<div class="modal fade" id="editDashboardModal" tabindex="-1"><div class="modal-dialog modal-dialog-centered"><div class="modal-content">
     <div class="modal-header text-white" style="background-color: var(--lmg-blue);">
         <h5 class="modal-title"><i class="bi bi-pencil-square"></i> Edit Dashboard Stats</h5>
         <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
@@ -411,13 +460,13 @@
         <h5 class="modal-title" id="imagePreviewTitle">Preview Foto</h5>
         <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
     </div>
-    <div class="modal-body text-center">
-        <img id="imagePreviewSrc" src="" alt="Preview" class="img-fluid rounded">
+    <div class="modal-body text-center p-0">
+        <img id="imagePreviewSrc" src="" alt="Preview" class="img-fluid rounded w-100">
     </div>
 </div></div></div>
 
 <!-- MODAL: HANDOVER (Serah Terima Otomatis) -->
-<div class="modal fade" id="handoverModal" tabindex="-1"><div class="modal-dialog"><div class="modal-content">
+<div class="modal fade" id="handoverModal" tabindex="-1"><div class="modal-dialog modal-dialog-centered"><div class="modal-content">
     <div class="modal-header text-white" style="background-color: var(--lmg-blue);">
         <h5 class="modal-title"><i class="bi bi-box-arrow-in-down"></i> Serah Terima APD</h5>
         <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
@@ -438,7 +487,7 @@
     </div>
 </div></div></div>
 
-<div class="modal fade" id="docModal" tabindex="-1"><div class="modal-dialog"><div class="modal-content">
+<div class="modal fade" id="docModal" tabindex="-1"><div class="modal-dialog modal-dialog-centered"><div class="modal-content">
     <div class="modal-header text-white" style="background-color: var(--lmg-blue);"><h5 class="modal-title" id="docModalTitle">File Action</h5><button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button></div>
     <div class="modal-body" id="docModalBody"></div>
 </div></div></div>
@@ -466,9 +515,9 @@
     ];
 
     let ppeDocumentation = [
-        {docNo:"DOC-PPE-001", reqDate:"2023-10-20", name:"Budi Santoso", nik:"1001", dept:"Maintenance", loc:"Workshop B", apd:"Safety Helmet", qty:2, status:"Completed", appSafety:"Approved", appPM:"Approved", appDate:"2023-10-21", handoverDate:"2023-10-22", apdPhoto:"https://via.placeholder.com/40", handoverPhoto:"https://via.placeholder.com/40", note:"Diserahkan langsung"},
-        {docNo:"DOC-PPE-002", reqDate:"2023-10-22", name:"Asep Kurniawan", nik:"1002", dept:"Production", loc:"Line 1", apd:"Safety Shoes", qty:1, status:"Pending Safety", appSafety:"Pending", appPM:"Pending", appDate:"-", handoverDate:"-", apdPhoto:"https://via.placeholder.com/40", handoverPhoto:"-", note:"Menunggu review safety"},
-        {docNo:"DOC-PPE-003", reqDate:"2023-10-23", name:"Joko Widodo", nik:"1003", dept:"Engineering", loc:"Site A", apd:"Face Shield", qty:3, status:"Pending PM", appSafety:"Approved", appPM:"Pending", appDate:"-", handoverDate:"-", apdPhoto:"https://via.placeholder.com/40", handoverPhoto:"-", note:"Sudah di-approve safety, menunggu PM"}
+        {docNo:"DOC-PPE-001", reqDate:"2023-10-20", name:"Budi Santoso", nik:"1001", dept:"Full Maintenance service", loc:"Workshop B", apd:"Safety Helmet", qty:2, status:"Completed", appSafety:"Approved", appPM:"Approved", appDate:"2023-10-21", handoverDate:"2023-10-22", apdPhoto:"https://via.placeholder.com/40", handoverPhoto:"https://via.placeholder.com/40", note:"Diserahkan langsung"},
+        {docNo:"DOC-PPE-002", reqDate:"2023-10-22", name:"Asep Kurniawan", nik:"1002", dept:"Service Contract", loc:"Line 1", apd:"Safety Shoes", qty:1, status:"Pending Safety", appSafety:"Pending", appPM:"Pending", appDate:"-", handoverDate:"-", apdPhoto:"https://via.placeholder.com/40", handoverPhoto:"-", note:"Menunggu review safety"},
+        {docNo:"DOC-PPE-003", reqDate:"2023-10-23", name:"Joko Widodo", nik:"1003", dept:"HSE", loc:"Site A", apd:"Face Shield", qty:3, status:"Pending PM", appSafety:"Approved", appPM:"Pending", appDate:"-", handoverDate:"-", apdPhoto:"https://via.placeholder.com/40", handoverPhoto:"-", note:"Sudah di-approve safety, menunggu PM"}
     ];
 
     let auditTrail = [];
@@ -479,11 +528,7 @@
     let currentFolder = "root";
     let idleTime = 0;
     
-    // Dashboard Settings (Editable by Admin)
-    let dashSettings = {
-        totalDocs: 450,
-        stockApd: 320
-    };
+    let dashSettings = { totalDocs: 450, stockApd: 320 };
 
     // === AUTH & SESSION ===
     document.getElementById('loginForm').addEventListener('submit', function(e) {
@@ -538,16 +583,36 @@
         renderAuditTrail(); renderDashActivity();
     }
 
-    // === NAVIGATION ===
-    function toggleSidebar() { document.getElementById('sidebar').classList.toggle('hidden'); document.getElementById('content').classList.toggle('full'); }
+    // === NAVIGATION & RESPONSIVE SIDEBAR ===
+    function toggleSidebar() {
+        const sidebar = document.getElementById('sidebar');
+        const overlay = document.getElementById('sidebarOverlay');
+        const content = document.getElementById('content');
+        
+        if (window.innerWidth <= 768) {
+            sidebar.classList.toggle('active');
+            overlay.classList.toggle('active');
+        } else {
+            sidebar.classList.toggle('hidden');
+            content.classList.toggle('full');
+        }
+    }
+
     function showPage(pageId, el) {
         document.querySelectorAll('.page-content').forEach(p => p.style.display = 'none');
         document.getElementById('page-' + pageId).style.display = 'block';
         document.querySelectorAll('.sidebar-menu a').forEach(a => a.classList.remove('active'));
         if(el) el.classList.add('active');
-        if(pageId === 'ppe_form') { generateReqNo(); }
-        if(pageId === 'ppe_approval') { renderApprovalQueues(); }
-        if(pageId === 'ppe_history') { renderHistoryTable(); }
+        
+        // Auto close sidebar on mobile when page is clicked
+        if (window.innerWidth <= 768) {
+            document.getElementById('sidebar').classList.remove('active');
+            document.getElementById('sidebarOverlay').classList.remove('active');
+        }
+
+        if(pageId === 'ppe_form') generateReqNo();
+        if(pageId === 'ppe_approval') renderApprovalQueues();
+        if(pageId === 'ppe_history') renderHistoryTable();
     }
 
     // === INIT ===
@@ -565,7 +630,7 @@
         updateDashboardStats();
     }
 
-    // === DASHBOARD EDIT LOGIC ===
+    // === DASHBOARD ===
     function updateDashboardStats() {
         document.getElementById('dashTotal').innerText = ppeDocumentation.length;
         document.getElementById('dashPending').innerText = ppeDocumentation.filter(d => d.status.includes("Pending") || d.status === "Siap Serah Terima").length;
@@ -587,7 +652,6 @@
         bootstrap.Modal.getInstance(document.getElementById('editDashboardModal')).hide();
     }
 
-    // === IMAGE PREVIEW LOGIC ===
     function previewImage(url, title) {
         document.getElementById('imagePreviewTitle').innerText = title || "Preview Foto";
         document.getElementById('imagePreviewSrc').src = url;
@@ -615,7 +679,6 @@
     function submitPPEForm(e) {
         e.preventDefault();
         const photoApdFile = document.getElementById('photoApd').files[0];
-
         const newDoc = {
             docNo: "DOC-PPE-" + Math.floor(100 + Math.random() * 900),
             reqDate: document.getElementById('reqDate').value,
@@ -634,20 +697,17 @@
             handoverPhoto: "-",
             note: document.getElementById('reqNote').value || "-"
         };
-        
         ppeDocumentation.unshift(newDoc);
         logActivity(`Submit pengajuan APD: ${newDoc.apd} oleh ${newDoc.name}`);
         alert("Pengajuan APD berhasil dikirim! Menunggu Review Safety Coordinator.");
-        e.target.reset(); 
-        generateReqNo();
+        e.target.reset(); generateReqNo();
         renderDocTable(); updateDashboardStats();
     }
 
-    // === APPROVAL SYSTEM & AUTO HANDOVER (WITH PHOTO REVIEW) ===
+    // === APPROVAL SYSTEM ===
     function renderApprovalQueues() {
         const safetyQueue = document.getElementById('safetyQueue');
         const pmQueue = document.getElementById('pmQueue');
-        
         let safetyHtml = '<p class="text-muted text-center">Tidak ada pengajuan menunggu Safety</p>';
         let pmHtml = '<p class="text-muted text-center">Tidak ada pengajuan menunggu PM</p>';
 
@@ -657,39 +717,34 @@
         if(safetyPending.length > 0) {
             safetyHtml = safetyPending.map(d => {
                 let photoHtml = d.apdPhoto !== '-' ? `<img src="${d.apdPhoto}" class="img-thumbnail mb-2" style="max-height: 100px; cursor: pointer;" onclick="previewImage('${d.apdPhoto}', 'Foto APD - ${d.apd}')">` : '<span class="text-muted small">No photo</span>';
-                return `
-                    <div class="card border-warning mb-2"><div class="card-body p-2">
-                        <div class="text-center">${photoHtml}</div>
-                        <h6 class="mb-0 text-dark mt-1">${d.name} <small class="text-muted">(${d.nik})</small></h6>
-                        <p class="mb-1"><small><b>${d.apd}</b> - ${d.qty} Pcs</small></p>
-                        <p class="mb-2 text-muted" style="font-size: 0.8rem">${d.note}</p>
-                        <div class="d-flex justify-content-end gap-2">
-                            <button class="btn btn-success btn-sm" onclick="approvePPE('${d.docNo}', 'safety', true)"><i class="bi bi-check-lg"></i> Approve</button>
-                            <button class="btn btn-danger btn-sm" onclick="approvePPE('${d.docNo}', 'safety', false)"><i class="bi bi-x-lg"></i> Reject</button>
-                        </div>
-                    </div></div>
-                `;
+                return `<div class="card border-warning mb-2"><div class="card-body p-2">
+                    <div class="text-center">${photoHtml}</div>
+                    <h6 class="mb-0 text-dark mt-1">${d.name} <small class="text-muted">(${d.nik})</small></h6>
+                    <p class="mb-1"><small><b>${d.apd}</b> - ${d.qty} Pcs</small></p>
+                    <p class="mb-2 text-muted" style="font-size: 0.8rem">${d.note}</p>
+                    <div class="d-flex justify-content-end gap-2">
+                        <button class="btn btn-success btn-sm" onclick="approvePPE('${d.docNo}', 'safety', true)"><i class="bi bi-check-lg"></i> Approve</button>
+                        <button class="btn btn-danger btn-sm" onclick="approvePPE('${d.docNo}', 'safety', false)"><i class="bi bi-x-lg"></i> Reject</button>
+                    </div>
+                </div></div>`;
             }).join('');
         }
 
         if(pmPending.length > 0) {
             pmHtml = pmPending.map(d => {
                 let photoHtml = d.apdPhoto !== '-' ? `<img src="${d.apdPhoto}" class="img-thumbnail mb-2" style="max-height: 100px; cursor: pointer;" onclick="previewImage('${d.apdPhoto}', 'Foto APD - ${d.apd}')">` : '<span class="text-muted small">No photo</span>';
-                return `
-                    <div class="card border-primary mb-2"><div class="card-body p-2">
-                        <div class="text-center">${photoHtml}</div>
-                        <h6 class="mb-0 text-dark mt-1">${d.name} <small class="text-muted">(${d.nik})</small></h6>
-                        <p class="mb-1"><small><b>${d.apd}</b> - ${d.qty} Pcs</small></p>
-                        <p class="mb-2 text-success" style="font-size: 0.8rem"><i class="bi bi-check-circle-fill"></i> Approved by Safety</p>
-                        <div class="d-flex justify-content-end gap-2">
-                            <button class="btn btn-success btn-sm" onclick="approvePPE('${d.docNo}', 'pm', true)"><i class="bi bi-check-lg"></i> Approve</button>
-                            <button class="btn btn-danger btn-sm" onclick="approvePPE('${d.docNo}', 'pm', false)"><i class="bi bi-x-lg"></i> Reject</button>
-                        </div>
-                    </div></div>
-                `;
+                return `<div class="card border-primary mb-2"><div class="card-body p-2">
+                    <div class="text-center">${photoHtml}</div>
+                    <h6 class="mb-0 text-dark mt-1">${d.name} <small class="text-muted">(${d.nik})</small></h6>
+                    <p class="mb-1"><small><b>${d.apd}</b> - ${d.qty} Pcs</small></p>
+                    <p class="mb-2 text-success" style="font-size: 0.8rem"><i class="bi bi-check-circle-fill"></i> Approved by Safety</p>
+                    <div class="d-flex justify-content-end gap-2">
+                        <button class="btn btn-success btn-sm" onclick="approvePPE('${d.docNo}', 'pm', true)"><i class="bi bi-check-lg"></i> Approve</button>
+                        <button class="btn btn-danger btn-sm" onclick="approvePPE('${d.docNo}', 'pm', false)"><i class="bi bi-x-lg"></i> Reject</button>
+                    </div>
+                </div></div>`;
             }).join('');
         }
-
         safetyQueue.innerHTML = safetyHtml;
         pmQueue.innerHTML = pmHtml;
     }
@@ -700,52 +755,43 @@
 
         if(role === 'safety') {
             doc.appSafety = isApproved ? "Approved" : "Rejected";
-            if(isApproved) { doc.status = "Pending PM"; logActivity(`Safety Coordinator Approved: ${doc.docNo}`); }
-            else { doc.status = "Rejected"; logActivity(`Safety Coordinator Rejected: ${doc.docNo}`); }
+            if(isApproved) { doc.status = "Pending PM"; logActivity(`Safety Approved: ${doc.docNo}`); }
+            else { doc.status = "Rejected"; logActivity(`Safety Rejected: ${doc.docNo}`); }
         } else if(role === 'pm') {
             doc.appPM = isApproved ? "Approved" : "Rejected";
             if(isApproved) {
                 doc.status = "Siap Serah Terima"; 
                 doc.appDate = new Date().toISOString().slice(0,10);
-                logActivity(`Project Manager Approved: ${doc.docNo}`);
+                logActivity(`PM Approved: ${doc.docNo}`);
                 renderApprovalQueues(); renderDocTable(); updateDashboardStats(); renderHistoryTable();
                 openHandoverModal(doc.docNo);
                 return; 
-            } else { 
-                doc.status = "Rejected"; logActivity(`Project Manager Rejected: ${doc.docNo}`); 
-            }
+            } else { doc.status = "Rejected"; logActivity(`PM Rejected: ${doc.docNo}`); }
         }
-
         renderApprovalQueues(); renderDocTable(); updateDashboardStats(); renderHistoryTable();
     }
 
-    // === HISTORY TABLE WITH HANDOVER BUTTON ===
+    // === HISTORY & HANDOVER ===
     function renderHistoryTable() {
         const tbody = document.getElementById('historyTableBody');
         tbody.innerHTML = ppeDocumentation.map(t => {
             let action = `<button class="btn btn-sm btn-outline-primary" onclick="previewImage('${t.apdPhoto}', 'Foto APD - ${t.docNo}')"><i class="bi bi-eye"></i> Lihat</button>`;
-            
             if(t.status === "Siap Serah Terima") {
-                action += ` <button class="btn btn-sm btn-success" onclick="openHandoverModal('${t.docNo}')"><i class="bi bi-box-arrow-in-down"></i> Serah Terima</button>`;
+                action += ` <button class="btn btn-sm btn-success mt-1 mt-md-0" onclick="openHandoverModal('${t.docNo}')"><i class="bi bi-box-arrow-in-down"></i> Serah Terima</button>`;
             }
-
             let badge = 'bg-warning text-dark';
             if(t.status === 'Completed') badge = 'bg-success';
             else if(t.status === 'Rejected') badge = 'bg-danger';
             else if(t.status === 'Pending PM') badge = 'bg-primary';
             else if(t.status === 'Siap Serah Terima') badge = 'bg-info text-dark';
-
-            return `
-                <tr>
-                    <td class="fw-bold">${t.docNo}</td><td>${t.reqDate}</td><td>${t.name}</td><td>${t.apd}</td>
-                    <td><span class="badge ${badge}">${t.status}</span></td>
-                    <td class="text-end">${action}</td>
-                </tr>
-            `;
+            return `<tr>
+                <td class="fw-bold">${t.docNo}</td><td>${t.reqDate}</td><td>${t.name}</td><td>${t.apd}</td>
+                <td><span class="badge ${badge}">${t.status}</span></td>
+                <td class="text-end">${action}</td>
+            </tr>`;
         }).join('');
     }
 
-    // === HANDOVER MODAL LOGIC ===
     function openHandoverModal(docNo) {
         document.getElementById('handoverDocNo').value = docNo;
         document.getElementById('handoverPhotoInput').value = ''; 
@@ -756,13 +802,11 @@
         const docNo = document.getElementById('handoverDocNo').value;
         const photoFile = document.getElementById('handoverPhotoInput').files[0];
         const doc = ppeDocumentation.find(d => d.docNo === docNo);
-        
         if(doc && photoFile) {
             doc.handoverPhoto = URL.createObjectURL(photoFile);
             doc.handoverDate = new Date().toISOString().slice(0,10);
             doc.status = "Completed";
-            logActivity(`Proses Serah Terima selesai: ${doc.docNo}`);
-            
+            logActivity(`Serah Terima selesai: ${doc.docNo}`);
             bootstrap.Modal.getInstance(document.getElementById('handoverModal')).hide();
             renderDocTable(); updateDashboardStats(); renderHistoryTable();
             alert("Serah terima berhasil dikonfirmasi!");
@@ -804,12 +848,12 @@
         const id = document.getElementById('ppeId').value;
         const data = { name: document.getElementById('ppeName').value, cat: document.getElementById('ppeCategory').value, size: document.getElementById('ppeSizeInput').value, stock: parseInt(document.getElementById('ppeStock').value), vendor: document.getElementById('ppeVendor').value, price: parseInt(document.getElementById('ppePrice').value), photo: document.getElementById('ppePhoto').value || "https://via.placeholder.com/50", active: document.getElementById('ppeStatus').checked };
         if(id) { masterPPE = masterPPE.map(p => p.id == id ? {...p, ...data} : p); logActivity(`Mengubah PPE: ${data.name}`); }
-        else { data.id = Date.now(); masterPPE.push(data); logActivity(`Menambah PPE baru: ${data.name}`); }
+        else { data.id = Date.now(); masterPPE.push(data); logActivity(`Menambah PPE: ${data.name}`); }
         bootstrap.Modal.getInstance(document.getElementById('ppeModal')).hide();
         renderPPEMasterTable(); renderPPEFormDropdown();
     }
     function deletePPE(id) {
-        if(confirm('Hapus PPE ini?')) { const p = masterPPE.find(p => p.id === id); masterPPE = masterPPE.filter(p => p.id !== id); logActivity(`Menghapus PPE: ${p.name}`); renderPPEMasterTable(); renderPPEFormDropdown(); }
+        if(confirm('Hapus PPE ini?')) { const p = masterPPE.find(p => p.id === id); masterPPE = masterPPE.filter(p => p.id !== id); logActivity(`Hapus PPE: ${p.name}`); renderPPEMasterTable(); renderPPEFormDropdown(); }
     }
     function openCategoryModal() { renderCategoryList(); new bootstrap.Modal(document.getElementById('categoryModal')).show(); }
     function addCategory() { const name = document.getElementById('newCatName').value; if(name && !ppeCategories.includes(name)) { ppeCategories.push(name); document.getElementById('newCatName').value = ''; renderCategoryList(); } }
@@ -833,26 +877,24 @@
     function saveUser() {
         const id = document.getElementById('userId').value; const pass = document.getElementById('userPassInput').value;
         const data = { name: document.getElementById('userNameInput').value, username: document.getElementById('userUsernameInput').value, role: document.getElementById('userRoleInput').value };
-        if(id) { const u = users.find(u => u.id == id); u.name = data.name; u.username = data.username; u.role = data.role; if(pass) u.pass = pass; logActivity(`Mengubah user: ${data.name}`); }
-        else { if(!pass) { alert("Password wajib diisi untuk user baru!"); return; } data.id = Date.now(); data.pass = pass; users.push(data); logActivity(`Menambah user baru: ${data.name}`); }
+        if(id) { const u = users.find(u => u.id == id); u.name = data.name; u.username = data.username; u.role = data.role; if(pass) u.pass = pass; logActivity(`Ubah user: ${data.name}`); }
+        else { if(!pass) { alert("Password wajib diisi!"); return; } data.id = Date.now(); data.pass = pass; users.push(data); logActivity(`Tambah user: ${data.name}`); }
         bootstrap.Modal.getInstance(document.getElementById('userModal')).hide(); renderUserTable();
     }
-    function resetPassword(id) { const u = users.find(u => u.id === id); const newPass = prompt(`Masukkan password baru untuk ${u.name}:`); if(newPass) { u.pass = newPass; logActivity(`Mereset password user: ${u.name}`); alert("Password berhasil direset!"); } }
-    function deleteUser(id) { if(confirm('Hapus user ini?')) { const u = users.find(u => u.id === id); users = users.filter(u => u.id !== id); logActivity(`Menghapus user: ${u.name}`); renderUserTable(); } }
+    function resetPassword(id) { const u = users.find(u => u.id === id); const newPass = prompt(`Password baru untuk ${u.name}:`); if(newPass) { u.pass = newPass; logActivity(`Reset password: ${u.name}`); alert("Password direset!"); } }
+    function deleteUser(id) { if(confirm('Hapus user?')) { const u = users.find(u => u.id === id); users = users.filter(u => u.id !== id); logActivity(`Hapus user: ${u.name}`); renderUserTable(); } }
 
     // === AUDIT TRAIL ===
     function renderAuditTrail() { document.getElementById('auditTrailBody').innerHTML = auditTrail.map(a => `<tr><td>${a.time}</td><td class="fw-bold">${a.user}</td><td>${a.action}</td></tr>`).join(''); }
     function renderDashActivity() { const list = auditTrail.slice(0, 5); document.getElementById('dashActivity').innerHTML = list.map(a => `<li class="list-group-item border-0"><i class="bi bi-clock-history text-primary me-2"></i> <small>${a.time}</small> - ${a.action}</li>`).join('') || '<li class="list-group-item border-0 text-muted">Belum ada aktivitas</li>'; }
 
-    // === PPE DOCUMENTATION, FILTER & EXPORT ===
+    // === DOCUMENTATION & EXPORT ===
     function populateFilterAPD() { const select = document.getElementById('filterAPD'); select.innerHTML = '<option value="">Semua</option>'; masterPPE.forEach(p => select.innerHTML += `<option>${p.name}</option>`); }
     function applyFilter() { renderDocTable(); }
     
     function getFilteredDocs() {
         let filtered = [...ppeDocumentation];
-        const fDept = document.getElementById('filterDept').value; 
-        const fAPD = document.getElementById('filterAPD').value; 
-        const fStatus = document.getElementById('filterStatus').value;
+        const fDept = document.getElementById('filterDept').value; const fAPD = document.getElementById('filterAPD').value; const fStatus = document.getElementById('filterStatus').value;
         if(fDept) filtered = filtered.filter(d => d.dept === fDept);
         if(fAPD) filtered = filtered.filter(d => d.apd === fAPD);
         if(fStatus) filtered = filtered.filter(d => d.status === fStatus);
@@ -875,76 +917,36 @@
     }
 
     function exportData(type) {
-        const data = getFilteredDocs().map(d => ({
-            "No Doc": d.docNo, "Tgl": d.reqDate, "Nama": d.name, "NIK": d.nik, "Dept": d.dept, "Lokasi": d.loc,
-            "APD": d.apd, "Jml": d.qty, "Status": d.status, "Tgl Approve": d.appDate, "Tgl Serah Terima": d.handoverDate, "Catatan": d.note
-        }));
-
-        if(type === 'excel') {
-            const ws = XLSX.utils.json_to_sheet(data); const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, "Dokumentasi APD"); XLSX.writeFile(wb, "Laporan_Dokumentasi_APD.xlsx");
-        } else if(type === 'csv') {
-            const ws = XLSX.utils.json_to_sheet(data); const csv = XLSX.utils.sheet_to_csv(ws); const blob = new Blob([csv], {type: "text/csv;charset=utf-8;"}); const link = document.createElement("a"); link.href = URL.createObjectURL(blob); link.download = "Laporan_Dokumentasi_APD.csv"; link.click();
-        } else if(type === 'pdf') {
-            const { jsPDF } = window.jspdf; const doc = new jsPDF('l', 'mm', 'a4');
-            doc.autoTable({ head: [["No Doc", "Tgl", "Nama", "NIK", "Dept", "APD", "Jml", "Status", "Tgl Approve", "Tgl Serah Terima"]], body: data.map(d => [d["No Doc"], d["Tgl"], d["Nama"], d["NIK"], d["Dept"], d["APD"], d["Jml"], d["Status"], d["Tgl Approve"], d["Tgl Serah Terima"]]), styles: { fontSize: 8, cellPadding: 2 }, headStyles: { fillColor: [0, 91, 170] } });
-            doc.save("Laporan_Dokumentasi_APD.pdf");
-        }
-        logActivity(`Export laporan dokumentasi APD ke ${type.toUpperCase()}`);
+        const data = getFilteredDocs().map(d => ({ "No Doc": d.docNo, "Tgl": d.reqDate, "Nama": d.name, "NIK": d.nik, "Dept": d.dept, "Lokasi": d.loc, "APD": d.apd, "Jml": d.qty, "Status": d.status, "Tgl Approve": d.appDate, "Tgl Serah Terima": d.handoverDate, "Catatan": d.note }));
+        if(type === 'excel') { const ws = XLSX.utils.json_to_sheet(data); const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, "Dokumentasi APD"); XLSX.writeFile(wb, "Laporan_Dokumentasi_APD.xlsx"); } 
+        else if(type === 'csv') { const ws = XLSX.utils.json_to_sheet(data); const csv = XLSX.utils.sheet_to_csv(ws); const blob = new Blob([csv], {type: "text/csv;charset=utf-8;"}); const link = document.createElement("a"); link.href = URL.createObjectURL(blob); link.download = "Laporan_Dokumentasi_APD.csv"; link.click(); } 
+        else if(type === 'pdf') { const { jsPDF } = window.jspdf; const doc = new jsPDF('l', 'mm', 'a4'); doc.autoTable({ head: [["No Doc", "Tgl", "Nama", "NIK", "Dept", "APD", "Jml", "Status", "Tgl Approve", "Tgl Serah Terima"]], body: data.map(d => [d["No Doc"], d["Tgl"], d["Nama"], d["NIK"], d["Dept"], d["APD"], d["Jml"], d["Status"], d["Tgl Approve"], d["Tgl Serah Terima"]]), styles: { fontSize: 8, cellPadding: 2 }, headStyles: { fillColor: [0, 91, 170] } }); doc.save("Laporan_Dokumentasi_APD.pdf"); }
+        logActivity(`Export laporan ke ${type.toUpperCase()}`);
     }
 
-    // === DOWNLOAD PHOTOS AS ZIP ===
     async function downloadPhotosZip() {
-        const filtered = getFilteredDocs();
-        const zip = new JSZip();
-        let count = 0;
-
+        const filtered = getFilteredDocs(); const zip = new JSZip(); let count = 0;
         for(const d of filtered) {
-            if(d.apdPhoto && d.apdPhoto !== '-') {
-                try {
-                    const response = await fetch(d.apdPhoto);
-                    const blob = await response.blob();
-                    zip.file(`${d.docNo}_Foto_APD.jpg`, blob);
-                    count++;
-                } catch(e) { console.error("Error fetching APD photo:", e); }
-            }
-            if(d.handoverPhoto && d.handoverPhoto !== '-') {
-                try {
-                    const response = await fetch(d.handoverPhoto);
-                    const blob = await response.blob();
-                    zip.file(`${d.docNo}_Foto_Serah_Terima.jpg`, blob);
-                    count++;
-                } catch(e) { console.error("Error fetching Handover photo:", e); }
-            }
+            if(d.apdPhoto && d.apdPhoto !== '-') { try { const response = await fetch(d.apdPhoto); const blob = await response.blob(); zip.file(`${d.docNo}_Foto_APD.jpg`, blob); count++; } catch(e) {} }
+            if(d.handoverPhoto && d.handoverPhoto !== '-') { try { const response = await fetch(d.handoverPhoto); const blob = await response.blob(); zip.file(`${d.docNo}_Foto_Serah_Terima.jpg`, blob); count++; } catch(e) {} }
         }
-
-        if(count > 0) {
-            zip.generateAsync({type:"blob"}).then(function(content) {
-                const link = document.createElement("a");
-                link.href = URL.createObjectURL(content);
-                link.download = "Foto_Dokumentasi_APD.zip";
-                link.click();
-                logActivity("Download Foto Dokumentasi APD (ZIP)");
-            });
-        } else {
-            alert("Tidak ada foto ditemukan pada filter saat ini.");
-        }
+        if(count > 0) { zip.generateAsync({type:"blob"}).then(function(content) { const link = document.createElement("a"); link.href = URL.createObjectURL(content); link.download = "Foto_Dokumentasi_APD.zip"; link.click(); logActivity("Download Foto (ZIP)"); }); } 
+        else { alert("Tidak ada foto ditemukan."); }
     }
 
     // === DOC EXPLORER ===
     function renderExplorer() {
-        const grid = document.getElementById('explorerGrid');
-        const searchTerm = document.getElementById('docSearchInput').value.toLowerCase();
-        grid.innerHTML = '';
+        const grid = document.getElementById('explorerGrid'); const searchTerm = document.getElementById('docSearchInput').value.toLowerCase(); grid.innerHTML = '';
         const isAdmin = currentUser && currentUser.role === 'Administrator';
 
         let folders = fileSystem.folders.filter(f => f.parent === currentFolder);
         if(searchTerm) folders = folders.filter(f => f.name.toLowerCase().includes(searchTerm));
         folders.forEach(f => {
             let actions = isAdmin ? `<button class="btn btn-sm btn-light" onclick="openDocModal('folder', '${f.id}')"><i class="bi bi-three-dots"></i></button>` : '';
-            grid.innerHTML += `<div class="col-md-2 col-sm-4 mb-3 drive-item" ondblclick="openFolder('${f.id}')">
-                <div class="card h-100"><div class="card-body">
-                    <i class="bi bi-folder-fill" style="font-size: 3.5rem; color: var(--lmg-yellow);"></i>
-                    <h6 class="mt-2 mb-0 text-truncate">${f.name}</h6>
+            grid.innerHTML += `<div class="col-4 col-md-3 col-lg-2 mb-3 drive-item" ondblclick="openFolder('${f.id}')">
+                <div class="card h-100"><div class="card-body p-2">
+                    <i class="bi bi-folder-fill d-block" style="font-size: 2.5rem; color: var(--lmg-yellow);"></i>
+                    <h6 class="mt-2 mb-0 text-truncate" style="font-size: 0.9rem">${f.name}</h6>
                 </div>
                 <div class="card-footer p-1 bg-light text-center border-0">
                     <button class="btn btn-sm btn-light" onclick="openFolder('${f.id}')"><i class="bi bi-folder2-open"></i></button>
@@ -959,9 +961,9 @@
             let icon = "bi-file-earmark", color = "var(--lmg-blue)";
             if(f.type === 'pdf') { icon = "bi-file-earmark-pdf"; color = "red"; } else if(f.type.includes('doc')) { icon = "bi-file-earmark-word"; color = "#2b579a"; }
             let actions = isAdmin ? `<button class="btn btn-sm btn-light" onclick="openDocModal('file', '${f.id}')"><i class="bi bi-three-dots"></i></button>` : '';
-            grid.innerHTML += `<div class="col-md-2 col-sm-4 mb-3 drive-item" ondblclick="previewFile('${f.id}')">
-                <div class="card h-100"><div class="card-body">
-                    <i class="bi ${icon}" style="font-size: 3.5rem; color: ${color};"></i>
+            grid.innerHTML += `<div class="col-4 col-md-3 col-lg-2 mb-3 drive-item" ondblclick="previewFile('${f.id}')">
+                <div class="card h-100"><div class="card-body p-2">
+                    <i class="bi ${icon} d-block" style="font-size: 2.5rem; color: ${color};"></i>
                     <h6 class="mt-2 mb-0 text-truncate" style="font-size: 0.85rem">${f.name}</h6>
                     <small class="text-muted">${f.size}</small>
                 </div>
@@ -986,10 +988,10 @@
         if(idx === -1) { currentFolder = "root"; } else { let path = []; let curr = currentFolder; while(curr !== "root") { let folder = fileSystem.folders.find(f => f.id === curr); path.unshift(folder); curr = folder.parent; } currentFolder = path[idx].id; }
         renderExplorer();
     }
-    function createFolder() { const name = prompt("Masukkan nama folder baru:"); if(name) { fileSystem.folders.push({id: "f" + Date.now(), name: name, parent: currentFolder}); logActivity(`Membuat folder: ${name}`); renderExplorer(); } }
+    function createFolder() { const name = prompt("Masukkan nama folder baru:"); if(name) { fileSystem.folders.push({id: "f" + Date.now(), name: name, parent: currentFolder}); logActivity(`Buat folder: ${name}`); renderExplorer(); } }
     function handleFileUpload(files) {
         Array.from(files).forEach(file => { let type = file.name.split('.').pop(); fileSystem.files.push({id: "d" + Date.now(), name: file.name, type: type, parent: currentFolder, size: (file.size / 1024 / 1024).toFixed(2) + " MB"}); });
-        logActivity(`Upload ${files.length} file dokumen`); renderExplorer();
+        logActivity(`Upload ${files.length} file`); renderExplorer();
     }
     const dropZone = document.getElementById('dropZone');
     dropZone.addEventListener('dragover', (e) => { e.preventDefault(); dropZone.classList.add('dragover'); });
@@ -999,7 +1001,7 @@
     function previewFile(id) {
         const f = fileSystem.files.find(f => f.id === id);
         document.getElementById('docModalTitle').innerText = f.name;
-        document.getElementById('docModalBody').innerHTML = `<div class="text-center mb-3"><i class="bi bi-file-earmark-pdf" style="font-size: 5rem; color: red;"></i></div><p><strong>Ukuran:</strong> ${f.size}</p><div class="alert alert-info">Preview Google Drive simulasi.</div><a href="#" class="btn btn-lmg w-100"><i class="bi bi-download"></i> Download</a>`;
+        document.getElementById('docModalBody').innerHTML = `<div class="text-center mb-3"><i class="bi bi-file-earmark-pdf" style="font-size: 5rem; color: red;"></i></div><p><strong>Ukuran:</strong> ${f.size}</p><div class="alert alert-info">Preview simulasi.</div><a href="#" class="btn btn-lmg w-100"><i class="bi bi-download"></i> Download</a>`;
         new bootstrap.Modal(document.getElementById('docModal')).show();
     }
     function openDocModal(type, id) {
@@ -1011,12 +1013,12 @@
     function renameItem(type, id) {
         let data = type === 'folder' ? fileSystem.folders.find(f => f.id === id) : fileSystem.files.find(f => f.id === id);
         const newName = prompt("Masukkan nama baru:", data.name);
-        if(newName) { data.name = newName; logActivity(`Mengubah nama ${type} menjadi: ${newName}`); bootstrap.Modal.getInstance(document.getElementById('docModal')).hide(); renderExplorer(); }
+        if(newName) { data.name = newName; logActivity(`Rename ${type}: ${newName}`); bootstrap.Modal.getInstance(document.getElementById('docModal')).hide(); renderExplorer(); }
     }
     function deleteItem(type, id) {
         if(confirm('Hapus item ini?')) {
             if(type === 'folder') { fileSystem.folders = fileSystem.folders.filter(f => f.id !== id); fileSystem.files = fileSystem.files.filter(f => f.parent !== id); } else { fileSystem.files = fileSystem.files.filter(f => f.id !== id); }
-            logActivity(`Menghapus ${type}`); bootstrap.Modal.getInstance(document.getElementById('docModal')).hide(); renderExplorer();
+            logActivity(`Hapus ${type}`); bootstrap.Modal.getInstance(document.getElementById('docModal')).hide(); renderExplorer();
         }
     }
 </script>
