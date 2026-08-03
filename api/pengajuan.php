@@ -1,68 +1,66 @@
 <?php
-// File: api/pengajuan.php
+require_once 'config.php';
 header("Content-Type: application/json; charset=UTF-8");
-include_once 'config.php';
 
-session_start();
 $method = $_SERVER['REQUEST_METHOD'];
 
-// 1. Jika method GET: Ambil daftar pengajuan untuk tabel Approval / Dashboard
-if ($method === 'GET') {
-    try {
-        $query = "SELECT p.*, m.nama_alat, m.satuan 
-                  FROM pengajuan_apd p 
-                  JOIN master_ppe m ON p.id_ppe = m.id 
-                  ORDER BY p.id DESC";
+if ($method === 'POST') {
+    // Menerima data JSON dari Frontend
+    $input = json_decode(file_get_contents('php://input'), true);
 
-        $stmt = $db->prepare($query);
-        $stmt->execute();
-        $records = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-        echo json_encode(["records" => $records]);
-    } catch (Exception $e) {
-        echo json_encode(["records" => [], "message" => "Error: " . $e->getMessage()]);
-    }
-} 
-
-// 2. Jika method POST: Simpan pengajuan baru dari pekerja
-elseif ($method === 'POST') {
-    $data = json_decode(file_get_contents("php://input"));
-
-    if (!empty($data->id_ppe) && !empty($data->jumlah) && !empty($data->keperluan)) {
-        try {
-            $user_id = $_SESSION['user_id'] ?? 1; // Default user ID jika session belum aktif
-
-            $query = "INSERT INTO pengajuan_apd (user_id, id_ppe, jumlah, keperluan, status, created_at) 
-                      VALUES (:user_id, :id_ppe, :jumlah, :keperluan, 'Pending Safety', NOW())";
-            
-            $stmt = $db->prepare($query);
-            $stmt->bindParam(':user_id', $user_id);
-            $stmt->bindParam(':id_ppe', $data->id_ppe);
-            $stmt->bindParam(':jumlah', $data->jumlah);
-            $stmt->bindParam(':keperluan', $data->keperluan);
-
-            if ($stmt->execute()) {
-                echo json_encode([
-                    "status" => "success", 
-                    "message" => "Pengajuan APD berhasil dikirim dan menunggu persetujuan Safety."
-                ]);
-            } else {
-                echo json_encode([
-                    "status" => "error", 
-                    "message" => "Gagal menyimpan pengajuan ke database."
-                ]);
-            }
-        } catch (Exception $e) {
-            echo json_encode([
-                "status" => "error", 
-                "message" => "Error: " . $e->getMessage()
-            ]);
+    if (!$input) {
+        // Jika data dikirim lewat FormData (karena ada upload file foto)
+        $reqNo = $_POST['reqNo'] ?? '';
+        $reqDate = $_POST['reqDate'] ?? '';
+        $reqName = $_POST['reqName'] ?? '';
+        $reqNik = $_POST['reqNik'] ?? '';
+        $reqDept = $_POST['reqDept'] ?? '';
+        $reqLoc = $_POST['reqLoc'] ?? '';
+        $ppeSelect = $_POST['ppeSelect'] ?? '';
+        $ppeSize = $_POST['ppeSize'] ?? '';
+        $ppeQty = $_POST['ppeQty'] ?? 0;
+        $reqNote = $_POST['reqNote'] ?? '';
+        
+        // Handle upload foto jika ada
+        $fotoApd = '';
+        if (isset($_FILES['photoApd']) && $_FILES['photoApd']['error'] === UPLOAD_ERR_OK) {
+            $ext = pathinfo($_FILES['photoApd']['name'], PATHINFO_EXTENSION);
+            $fotoApd = 'uploads/' . time() . '_' . uniqid() . '.' . $ext;
+            move_uploaded_file($_FILES['photoApd']['tmp_name'], '../' . $fotoApd);
         }
-    } else {
-        echo json_encode([
-            "status" => "error", 
-            "message" => "Semua kolom form pengajuan harus diisi."
-        ]);
+
+        try {
+            $stmt = $db->prepare("INSERT INTO pengajuan_apd (no_doc, tanggal, nama, nik, dept, lokasi, jenis_apd, ukuran, jumlah, foto_apd, catatan, status) 
+                VALUES (:no_doc, :tanggal, :nama, :nik, :dept, :lokasi, :jenis_apd, :ukuran, :jumlah, :foto_apd, :catatan, 'Pending Safety')");
+            
+            $stmt->execute([
+                'no_doc' => $reqNo,
+                'tanggal' => $reqDate,
+                'nama' => $reqName,
+                'nik' => $reqNik,
+                'dept' => $reqDept,
+                'lokasi' => $reqLoc,
+                'jenis_apd' => $ppeSelect,
+                'ukuran' => $ppeSize,
+                'jumlah' => $ppeQty,
+                'foto_apd' => $fotoApd,
+                'catatan' => $reqNote
+            ]);
+
+            echo json_encode(["status" => "success", "message" => "Pengajuan berhasil dikirim!"]);
+        } catch (PDOException $e) {
+            http_response_code(500);
+            echo json_encode(["status" => "error", "message" => $e->getMessage()]);
+        }
+    }
+} elseif ($method === 'GET') {
+    // Mengambil data untuk Riwayat & Dokumentasi
+    try {
+        $stmt = $db->query("SELECT * FROM pengajuan_apd ORDER BY id DESC");
+        $data = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        echo json_encode(["status" => "success", "data" => $data]);
+    } catch (PDOException $e) {
+        echo json_encode(["status" => "error", "message" => $e->getMessage()]);
     }
 }
 ?>
