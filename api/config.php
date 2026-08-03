@@ -1,23 +1,31 @@
 <?php
-// Konfigurasi Koneksi Database menggunakan PDO
-$host = 'srv2132.hstgr.io';
-$db_name = 'u684817258_DataSystemPPE';
-$username = 'u684817258_SafetyMining';
-$password = 'Pn.W@Y$8b5fhTNPw';
+header("Content-Type: application/json");
+header("Access-Control-Allow-Origin: *");
+header("Access-Control-Allow-Headers: Content-Type");
+header("Access-Control-Allow-Methods: GET,POST,PUT,DELETE");
 
-try {
-    $db = new PDO("mysql:host=$host;dbname=$dbname;charset=utf8mb4", $username, $password);
-    
-    // Set mode error PDO ke Exception agar mudah mendeteksi error
-    $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-    
-} catch (PDOException $e) {
-    // Jika koneksi gagal
+$host = "localhost";
+$dbname = "u684817258_DataSystemPPE";
+$username = "u684817258_SafetyMining";
+$password = "Pn.W@Y$8b5fhTNPw";
+
+try{
+    $pdo = new PDO(
+        "mysql:host=$host;dbname=$dbname;charset=utf8mb4",
+        $username,
+        $password
+    );
+
+    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+
+}catch(PDOException $e){
+
     http_response_code(500);
+
     echo json_encode([
-        "status" => "error",
-        "message" => "Koneksi database gagal: " . $e->getMessage()
+        "success"=>false,
+        "message"=>$e->getMessage()
     ]);
-    exit();
+
+    exit;
 }
-?>
