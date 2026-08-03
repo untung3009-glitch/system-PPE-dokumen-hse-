@@ -1,6 +1,6 @@
 <?php
 // Konfigurasi Koneksi Database menggunakan PDO
-$host = 'localhost';
+$host = 'srv2132.hstgr.io';
 $db_name = 'u684817258_DataSystemPPE';
 $username = 'u684817258_SafetyMining';
 $password = 'Pn.W@Y$8b5fhTNPw';
