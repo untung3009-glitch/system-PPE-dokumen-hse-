@@ -1,0 +1,63 @@
+// Sidebar Toggle
+document.getElementById('sidebarToggle')?.addEventListener('click', function() {
+    document.getElementById('sidebar').classList.toggle('active');
+    document.getElementById('content').classList.toggle('active');
+});
+
+// Dashboard Realtime
+async function fetchDashboardData() {
+    try {
+        const response = await fetch('api/dashboard.php');
+        const data = await response.json();
+        
+        if(data.error) return;
+
+        document.getElementById('total_pengajuan').innerText = data.stats.total_pengajuan;
+        document.getElementById('pending_review').innerText = data.stats.pending_review;
+        document.getElementById('pending_approval').innerText = data.stats.pending_approval;
+        document.getElementById('disetujui').innerText = data.stats.disetujui;
+        document.getElementById('stockList').innerHTML = data.stock_html;
+
+        updateChart(data.chart.labels, data.chart.data);
+    } catch (error) {
+        console.error('Error fetching dashboard:', error);
+    }
+}
+
+let chartInstance = null;
+function updateChart(labels, data) {
+    const ctx = document.getElementById('chartPengajuan')?.getContext('2d');
+    if(!ctx) return;
+
+    if (chartInstance) chartInstance.destroy();
+
+    chartInstance = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'Pengajuan APD',
+                data: data,
+                borderColor: '#0d6efd',
+                backgroundColor: 'rgba(13, 110, 253, 0.1)',
+                fill: true,
+                tension: 0.4
+            }]
+        },
+        options: { responsive: true, scales: { y: { beginAtZero: true } } }
+    });
+}
+
+if (window.location.pathname.includes('index.php')) {
+    fetchDashboardData();
+    setInterval(fetchDashboardData, 3000); // Refresh setiap 3 detik
+}
+
+// Global AJAX Setup for CSRF (Contoh untuk POST request)
+async function ajaxPost(url, formData) {
+    const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+    if(csrfToken) formData.append('csrf_token', csrfToken);
+    
+    const response = await fetch(url, { method: 'POST', body: formData });
+    return response.json();
+}
