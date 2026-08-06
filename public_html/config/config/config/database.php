@@ -1,8 +1,8 @@
 <?php
 // Sesuaikan dengan Hostinger
 define('DB_HOST', 'localhost');
-define('DB_NAME', 'u684817258_systemppe');
-define('DB_USER', 'u684817258_Safetysystem');
+define('DB_NAME', 'u684817258_safetymineppe');
+define('DB_USER', 'u684817258_usr_safetyppe');
 define('DB_PASS', 'n.W@Y$8b5fhTNPw');
 
 try {
