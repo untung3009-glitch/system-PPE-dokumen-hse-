@@ -1,6 +1,3 @@
-CREATE DATABASE IF NOT EXISTS hse_app;
-USE hse_app;
-
 -- Roles
 CREATE TABLE roles (
     id INT AUTO_INCREMENT PRIMARY KEY,

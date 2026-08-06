@@ -9,13 +9,11 @@
                 <li><a href="pengajuan.php"><i class="bi bi-file-earmark-plus me-2"></i> Pengajuan APD</a></li>
                 
                 <?php if(in_array($_SESSION['role_name'], ['Safety', 'Admin'])): ?>
-                <li><a href="review_safety.php"><i class="bi bi-shield-check me-2"></i> Review Safety</a></li>
-                <li><a href="approval_safety.php"><i class="bi bi-check2-circle me-2"></i> Approval Safety</a></li>
+                <li><a href="review_approval.php"><i class="bi bi-shield-check me-2"></i> Review Safety</a></li>
                 <?php endif; ?>
 
                 <?php if(in_array($_SESSION['role_name'], ['Project Manager', 'Admin'])): ?>
-                <li><a href="review_pm.php"><i class="bi bi-clipboard-check me-2"></i> Review PM</a></li>
-                <li><a href="approval_pm.php"><i class="bi bi-check2-all me-2"></i> Approval PM</a></li>
+                <li><a href="review_approval.php"><i class="bi bi-clipboard-check me-2"></i> Review PM</a></li>
                 <?php endif; ?>
 
                 <li><a href="stock_apd.php"><i class="bi bi-box-seam me-2"></i> Stock APD</a></li>
@@ -37,9 +35,24 @@
             <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm">
                 <div class="container-fluid">
                     <button class="btn btn-primary d-md-inline" id="sidebarToggle"><i class="bi bi-list"></i></button>
-                    <span class="navbar-brand ms-3 fw-bold text-primary">HSE Management System</span>
-                    <div class="ms-auto">
-                        <span class="me-3 text-muted">Halo, <strong><?= e($_SESSION['name']) ?></strong></span>
+                    <span class="navbar-brand ms-3 fw-bold text-primary d-none d-md-block">HSE Management System</span>
+                    
+                    <div class="ms-auto d-flex align-items-center">
+                        <!-- Notifikasi Dropdown -->
+                        <div class="dropdown me-3">
+                            <a href="#" class="btn btn-light position-relative" id="notifDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                                <i class="bi bi-bell-fill text-primary fs-5"></i>
+                                <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" id="notifCount" style="display: none;">0</span>
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-end p-0" style="width: 300px; max-height: 400px; overflow-y: auto;">
+                                <li class="dropdown-header bg-primary text-white rounded-top"><strong>Notifikasi</strong></li>
+                                <div id="notifList">
+                                    <li class="dropdown-item text-center text-muted py-3">Loading...</li>
+                                </div>
+                            </ul>
+                        </div>
+                        
+                        <span class="me-3 text-muted d-none d-md-block">Halo, <strong><?= e($_SESSION['name']) ?></strong></span>
                     </div>
                 </div>
             </nav>
