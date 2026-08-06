@@ -1,129 +1,33 @@
 <?php
-require_once 'config.php';
+require 'koneksi.php';
+check_auth();
 
-header("Content-Type: application/json; charset=UTF-8");
-
-try {
-
-    if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-
-        $reqNo      = $_POST['reqNo'] ?? '';
-        $reqDate    = $_POST['reqDate'] ?? '';
-        $reqName    = $_POST['reqName'] ?? '';
-        $reqNik     = $_POST['reqNik'] ?? '';
-        $reqDept    = $_POST['reqDept'] ?? '';
-        $reqLoc     = $_POST['reqLoc'] ?? '';
-        $ppeSelect  = $_POST['ppeSelect'] ?? '';
-        $ppeSize    = $_POST['ppeSize'] ?? '';
-        $ppeQty     = $_POST['ppeQty'] ?? 0;
-        $reqNote    = $_POST['reqNote'] ?? '';
-
-        $fotoApd = "";
-
-        // Upload Foto
-        if(isset($_FILES['photoApd']) && $_FILES['photoApd']['error']==0){
-
-            if(!is_dir("../uploads")){
-                mkdir("../uploads",0777,true);
-            }
-
-            $ext = pathinfo($_FILES["photoApd"]["name"], PATHINFO_EXTENSION);
-
-            $namaFile = time()."_".uniqid().".".$ext;
-
-            $tujuan = "../uploads/".$namaFile;
-
-            if(move_uploaded_file($_FILES["photoApd"]["tmp_name"],$tujuan)){
-                $fotoApd = "uploads/".$namaFile;
-            }
-
-        }
-
-        $sql = $pdo->prepare("
-
-            INSERT INTO pengajuan_apd
-
-            (
-                no_doc,
-                tanggal,
-                nama,
-                nik,
-                dept,
-                lokasi,
-                jenis_apd,
-                ukuran,
-                jumlah,
-                foto_apd,
-                catatan,
-                status
-            )
-
-            VALUES
-
-            (
-                :no_doc,
-                :tanggal,
-                :nama,
-                :nik,
-                :dept,
-                :lokasi,
-                :jenis_apd,
-                :ukuran,
-                :jumlah,
-                :foto_apd,
-                :catatan,
-                'Pending Safety'
-            )
-
-        ");
-
-        $sql->execute([
-
-            ':no_doc'=>$reqNo,
-            ':tanggal'=>$reqDate,
-            ':nama'=>$reqName,
-            ':nik'=>$reqNik,
-            ':dept'=>$reqDept,
-            ':lokasi'=>$reqLoc,
-            ':jenis_apd'=>$ppeSelect,
-            ':ukuran'=>$ppeSize,
-            ':jumlah'=>$ppeQty,
-            ':foto_apd'=>$fotoApd,
-            ':catatan'=>$reqNote
-
-        ]);
-
-        echo json_encode([
-            "status"=>"success",
-            "message"=>"Data berhasil disimpan"
-        ]);
-
-        exit;
-
-    }
-
-    if($_SERVER['REQUEST_METHOD']=="GET"){
-
-        $sql=$pdo->query("SELECT * FROM pengajuan_apd ORDER BY id DESC");
-
-        $data=$sql->fetchAll(PDO::FETCH_ASSOC);
-
-        echo json_encode([
-            "status"=>"success",
-            "data"=>$data
-        ]);
-
-        exit;
-
-    }
-
-}catch(PDOException $e){
-
-    http_response_code(500);
-
-    echo json_encode([
-        "status"=>"error",
-        "message"=>$e->getMessage()
-    ]);
-
+if ($_SERVER['REQUEST_METHOD'] === 'GET') {
+    $stmt = $pdo->query("SELECT * FROM pengajuan_apd ORDER BY created_at DESC");
+    send_json(['status' => 'success', 'data' => $stmt->fetchAll()]);
 }
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    check_auth(['Employee', 'Administrator']); // Hanya User biasa dan Admin yang bisa mengajukan
+    
+    $doc_no = 'PPE-' . date('Ymd') . '-' . rand(100,999);
+    $uploadDir = '../uploads/';
+    
+    $apdPhotoPath = '-';
+    if (!empty($_FILES['photoApd']['name'])) {
+        $ext = pathinfo($_FILES['photoApd']['name'], PATHINFO_EXTENSION);
+        $fileName = $doc_no . '_apd.' . $ext;
+        move_uploaded_file($_FILES['photoApd']['tmp_name'], $uploadDir . $fileName);
+        $apdPhotoPath = 'uploads/' . $fileName;
+    }
+
+    $stmt = $pdo->prepare("INSERT INTO pengajuan_apd (doc_no, user_id, name, nik, dept, loc, apd_name, qty, apd_photo, note) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+    $stmt->execute([
+        $doc_no, $_SESSION['user_id'], $_POST['reqName'], $_POST['reqNik'], $_POST['reqDept'],
+        $_POST['reqLoc'], $_POST['apdName'], $_POST['qty'], $apdPhotoPath, $_POST['note']
+    ]);
+    
+    add_log($pdo, "Submit pengajuan APD: $doc_no");
+    send_json(['status' => 'success', 'message' => 'Pengajuan berhasil dikirim']);
+}
+?>

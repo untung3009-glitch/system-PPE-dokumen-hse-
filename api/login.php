@@ -1,39 +1,22 @@
 <?php
-session_start();
-require_once "config.php";
+require 'koneksi.php';
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $input = json_decode(file_get_contents('php://input'), true);
+    $username = $input['username'] ?? '';
+    $password = $input['password'] ?? '';
 
-$data=json_decode(file_get_contents("php://input"),true);
+    $stmt = $pdo->prepare("SELECT * FROM users WHERE username = ?");
+    $stmt->execute([$username]);
+    $user = $stmt->fetch();
 
-$username=$data["username"] ?? "";
-$password=$data["password"] ?? "";
-
-$sql=$pdo->prepare("SELECT * FROM users WHERE username=? LIMIT 1");
-$sql->execute([$username]);
-
-$user=$sql->fetch(PDO::FETCH_ASSOC);
-
-if(!$user){
-
-    echo json_encode([
-        "success"=>false,
-        "message"=>"Username tidak ditemukan"
-    ]);
-    exit;
+    if ($user && password_verify($password, $user['password'])) {
+        $_SESSION['user_id'] = $user['id'];
+        $_SESSION['name'] = $user['name'];
+        $_SESSION['role'] = $user['role'];
+        add_log($pdo, "Login ke sistem");
+        send_json(['status' => 'success', 'user' => ['name' => $user['name'], 'role' => $user['role']]]);
+    } else {
+        send_json(['status' => 'error', 'message' => 'Username atau Password salah'], 401);
+    }
 }
-
-if(!password_verify($password,$user["password"])){
-
-    echo json_encode([
-        "success"=>false,
-        "message"=>"Password salah"
-    ]);
-    exit;
-}
-
-$_SESSION["user_id"]=$user["id"];
-$_SESSION["role"]=$user["role"];
-
-echo json_encode([
-    "success"=>true,
-    "user"=>$user
-]);
+?>

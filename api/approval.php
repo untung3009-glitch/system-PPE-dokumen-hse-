@@ -1,32 +1,38 @@
 <?php
-require_once 'config.php';
-header("Content-Type: application/json; charset=UTF-8");
+require 'koneksi.php';
+check_auth();
 
-$input = json_decode(file_get_contents('php://input'), true);
-$id = $input['id'] ?? '';
-$action = $input['action'] ?? ''; // approve atau reject
-$level = $input['level'] ?? '';   // safety atau pm
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $id = $_POST['id'];
+    $role = $_POST['role']; // safety atau pm
+    $isApproved = $_POST['isApproved'] === 'true';
+    
+    $stmt = $pdo->prepare("SELECT * FROM pengajuan_apd WHERE id = ?");
+    $stmt->execute([$id]);
+    $doc = $stmt->fetch();
 
-if (!$id || !$action || !$level) {
-    echo json_encode(["status" => "error", "message" => "Data tidak lengkap."]);
-    exit();
-}
+    if (!$doc) send_json(['status' => 'error', 'message' => 'Data tidak ditemukan'], 404);
 
-try {
-    if ($level === 'safety') {
-        $newStatus = ($action === 'approve') ? 'Pending PM' : 'Rejected';
-        $stmt = $db->prepare("UPDATE pengajuan_apd SET status = :status WHERE id = :id");
-        $stmt->execute(['status' => $newStatus, 'id' => $id]);
-    } elseif ($level === 'pm') {
-        $newStatus = ($action === 'approve') ? 'Siap Serah Terima' : 'Rejected';
-        $tanggalApprove = date('Y-m-d');
-        $stmt = $db->prepare("UPDATE pengajuan_apd SET status = :status, tgl_approve = :tgl WHERE id = :id");
-        $stmt->execute(['status' => $newStatus, 'tgl' => $tanggalApprove, 'id' => $id]);
+    if ($role === 'safety') {
+        check_auth(['Safety Coordinator', 'Administrator']);
+        $doc['app_safety'] = $isApproved ? 'Approved' : 'Rejected';
+        $doc['status'] = $isApproved ? 'Pending PM' : 'Rejected';
+    } elseif ($role === 'pm') {
+        check_auth(['Project Manager', 'Administrator']);
+        $doc['app_pm'] = $isApproved ? 'Approved' : 'Rejected';
+        $doc['status'] = $isApproved ? 'Completed' : 'Rejected';
+        
+        // Auto Update Stock jika PM Approve
+        if ($isApproved) {
+            $updStock = $pdo->prepare("UPDATE master_ppe SET stock = stock - ? WHERE name = ?");
+            $updStock->execute([$doc['qty'], $doc['apd_name']]);
+        }
     }
 
-    echo json_encode(["status" => "success", "message" => "Approval berhasil diperbarui!"]);
-} catch (PDOException $e) {
-    http_response_code(500);
-    echo json_encode(["status" => "error", "message" => $e->getMessage()]);
+    $upd = $pdo->prepare("UPDATE pengajuan_apd SET status=?, app_safety=?, app_pm=? WHERE id=?");
+    $upd->execute([$doc['status'], $doc['app_safety'], $doc['app_pm'], $id]);
+    
+    add_log($pdo, "Approval $role untuk doc $doc[doc_no]: " . ($isApproved ? 'Approved' : 'Rejected'));
+    send_json(['status' => 'success', 'message' => 'Status diperbarui']);
 }
 ?>

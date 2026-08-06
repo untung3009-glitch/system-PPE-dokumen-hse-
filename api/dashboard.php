@@ -1,21 +1,14 @@
-function loadDashboardStats() {
-    fetch('api/dashboard.php', {
-        method: 'GET'
-    })
-    .then(response => response.json())
-    .then(data => {
-        // Asumsikan struktur data dari backend mengembalikan objek statistik
-        if(data) {
-            let elTotalReq = document.getElementById('statTotalPengajuan');
-            let elApproved = document.getElementById('statApproved');
-            let elPending = document.getElementById('statPending');
-            let elStockAlert = document.getElementById('statStockAlert');
+<?php
+require 'koneksi.php';
+check_auth();
 
-            if(elTotalReq) elTotalReq.innerText = data.total_pengajuan || 0;
-            if(elApproved) elApproved.innerText = data.total_approved || 0;
-            if(elPending) elPending.innerText = data.total_pending || 0;
-            if(elStockAlert) elStockAlert.innerText = data.stock_alert || 0;
-        }
-    })
-    .catch(err => console.error("Gagal memuat statistik dashboard:", err));
-}
+ $total = $pdo->query("SELECT COUNT(*) FROM pengajuan_apd")->fetchColumn();
+ $pending = $pdo->query("SELECT COUNT(*) FROM pengajuan_apd WHERE status IN ('Pending Safety','Pending PM')")->fetchColumn();
+ $stock = $pdo->query("SELECT SUM(stock) FROM master_ppe WHERE active=1")->fetchColumn();
+
+send_json([
+    'total' => $total,
+    'pending' => $pending,
+    'stock' => $stock ?: 0
+]);
+?>
