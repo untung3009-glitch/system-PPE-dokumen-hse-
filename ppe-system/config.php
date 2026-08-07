@@ -1,6 +1,6 @@
 <?php
 // Konfigurasi Database Hostinger
-define('DB_HOST', 'localhost');
+define('DB_HOST', 'srv2132.hstgr.io');
 define('DB_NAME', 'u684817258_Systemlmippe');
 define('DB_USER', 'u684817258_Systemlmippe');
 define('DB_PASS', 'n.W@Y$8b5fhTNPw');
