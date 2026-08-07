@@ -33,7 +33,7 @@ if ($action === 'login' && $method === 'POST') {
     exit;
 }
 
-// Middleware Autentikasi untuk endpoint lain
+// Middleware Autentikasi
 if (!isset($_SESSION['user_id'])) {
     http_response_code(403);
     echo json_encode(['status' => 'error', 'message' => 'Unauthorized']);
@@ -44,7 +44,6 @@ if (!isset($_SESSION['user_id'])) {
  $role = $_SESSION['role'];
 
 if ($action === 'submit_request' && $method === 'POST') {
-    // Handle Form Data dengan Upload Foto
     $nama = $_POST['nama'];
     $nik = $_POST['nik'];
     $departemen = $_POST['departemen'];
@@ -77,6 +76,8 @@ if ($action === 'get_requests') {
     // Filter berdasarkan role
     if ($role === 'Supervisor') {
         $query .= " AND status = 'Pending Supervisor'";
+    } elseif ($role === 'Project Manager') {
+        $query .= " AND status = 'Pending Project Manager'";
     } elseif ($role === 'Safety') {
         $query .= " AND status = 'Pending Safety'";
     } elseif ($role === 'Warehouse') {
@@ -110,10 +111,13 @@ if ($action === 'approve_request' && $method === 'POST') {
         $pdo->prepare("UPDATE ppe_requests SET status = 'Rejected' WHERE id = ?")->execute([$req_id]);
         log_audit($pdo, $user_id, "Menolak pengajuan PPE ID: $req_id");
     } else {
-        // Logika Approval Flow
+        // Logika Approval Flow (Supervisor -> Project Manager -> Safety -> Warehouse)
         if ($role === 'Supervisor' && $req['status'] === 'Pending Supervisor') {
-            $pdo->prepare("UPDATE ppe_requests SET status = 'Pending Safety' WHERE id = ?")->execute([$req_id]);
+            $pdo->prepare("UPDATE ppe_requests SET status = 'Pending Project Manager' WHERE id = ?")->execute([$req_id]);
             log_audit($pdo, $user_id, "Approve Supervisor PPE ID: $req_id");
+        } elseif ($role === 'Project Manager' && $req['status'] === 'Pending Project Manager') {
+            $pdo->prepare("UPDATE ppe_requests SET status = 'Pending Safety' WHERE id = ?")->execute([$req_id]);
+            log_audit($pdo, $user_id, "Approve Project Manager PPE ID: $req_id");
         } elseif ($role === 'Safety' && $req['status'] === 'Pending Safety') {
             $pdo->prepare("UPDATE ppe_requests SET status = 'Pending Warehouse' WHERE id = ?")->execute([$req_id]);
             log_audit($pdo, $user_id, "Approve Safety PPE ID: $req_id");
@@ -154,7 +158,6 @@ if ($action === 'get_stats') {
     $pending = $pdo->query("SELECT COUNT(*) as count FROM ppe_requests WHERE status LIKE 'Pending%'")->fetch()['count'];
     $stock = $pdo->query("SELECT SUM(stok) as count FROM ppe_items")->fetch()['count'];
 
-    // Data untuk Chart
     $chartData = $pdo->query("SELECT jenis_ppe, SUM(jumlah) as total FROM ppe_requests WHERE status='Approved' GROUP BY jenis_ppe")->fetchAll();
 
     echo json_encode([
